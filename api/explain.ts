@@ -23,7 +23,8 @@ function json(body: unknown, status = 200, cache = false) {
 export default async function handler(request: Request) {
   if (request.method !== 'GET') return json({ error: 'Method not allowed.' }, 405)
 
-  const url = new URL(request.url)
+  // Vercel's Web Request adapter can expose a relative URL in Node functions.
+  const url = new URL(request.url, 'https://bdh-state-microscope.vercel.app')
   const lens = url.searchParams.get('lens') as Lens | null
   const overlapPercent = Number(url.searchParams.get('overlap'))
   const itemCount = Number(url.searchParams.get('load'))
