@@ -111,7 +111,7 @@ The older `src/engine/memory.ts` fixture remains only as preserved prototype his
 | Reported numeric results in this README | Make the expected release behavior auditable | Reproduced locally from the same engine and guarded by tests |
 | Paper context and BDH bridge | Connect the exhibit to current research | Paper-supported interpretation, explicitly separated from reproduced results |
 | Blog PDF | Satisfy the distinct latent-reasoning essay deliverable | Pre-authored document; not part of the live microscope computation |
-| API research interlocutor | Challenge or teach one selected deterministic trace | Bounded server response with trace-aware deterministic co-review; upgrades to Grok through Vercel AI Gateway when available; never an oracle or evidence source |
+| API research interlocutor | Challenge or teach one selected deterministic trace | Bounded server response from Groq-hosted GPT-OSS 120B, with a trace-aware deterministic fallback; never an oracle or evidence source |
 
 ## Run and verify
 
@@ -122,7 +122,7 @@ pnpm install
 pnpm dev
 ```
 
-No environment variables, API keys, accounts, model weights, remote services, or network calls are required for the complete deterministic microscope. The optional essay companion calls a bounded repository-authored API endpoint. That endpoint uses a trace-aware deterministic co-review by default and can route to Grok 4.1 Fast through Vercel AI Gateway when account billing permits; Vercel deployment OIDC authenticates the model route without shipping a browser secret. If the endpoint itself is unavailable, every experiment, verdict, test, and source remains usable.
+No environment variables, API keys, accounts, model weights, remote services, or network calls are required for the complete deterministic microscope. The optional essay companion calls a bounded repository-authored API endpoint. That endpoint sends only a validated, engine-derived numeric trace to Groq-hosted GPT-OSS 120B using a server-only `GROQ_API_KEY`, with a trace-aware deterministic fallback if the model route is unavailable. No browser secret is shipped. If the endpoint itself is unavailable, every experiment, verdict, test, and source remains usable.
 
 Run the complete gate:
 
@@ -175,14 +175,14 @@ See [docs/EXPERIMENT_RESULTS_AND_ARCHITECTURE.md](docs/EXPERIMENT_RESULTS_AND_AR
 
 ## AI assistance disclosure
 
-OpenAI Codex assisted with problem-statement analysis, literature research, concept selection, mathematics, implementation, testing, interface work, documentation, and QA. The submitting team must run and defend the mechanism and independently verify the cited primary work. At runtime, a repository-authored API generates bounded deterministic commentary from a declared numeric trace. When Vercel AI Gateway is available, Grok 4.1 Fast can replace that commentary with a stochastic co-review. The interface names the actual responder; neither response class is used as experiment evidence. No external generated media or proprietary code is shipped.
+OpenAI Codex assisted with problem-statement analysis, literature research, concept selection, mathematics, implementation, testing, interface work, documentation, and QA. The submitting team must run and defend the mechanism and independently verify the cited primary work. At runtime, a repository-authored API asks Groq-hosted GPT-OSS 120B for bounded commentary on a declared numeric trace and serves a deterministic trace-aware fallback if that model route is unavailable. The interface names the actual responder; neither response class is used as experiment evidence. No external generated media or proprietary code is shipped.
 
 ## Source and license record
 
 - Application code and writing: original for this submission, AI-assisted as disclosed.
 - Runtime data: deterministic synthetic vectors generated locally.
 - Model weights and external datasets: none.
-- Runtime interpretation service: repository-authored deterministic co-review with an optional Grok 4.1 Fast route via Vercel AI Gateway; server-side OIDC, bounded structured inputs, capped output, cached responses.
+- Runtime interpretation service: Groq-hosted GPT-OSS 120B with a repository-authored deterministic fallback; server-only credential, bounded structured inputs, capped output, cached responses.
 - Graphics: CSS and inline SVG authored in this repository.
 - Fonts: operating-system stacks only.
 - Research papers: linked, not redistributed.

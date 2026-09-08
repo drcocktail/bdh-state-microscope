@@ -19,7 +19,7 @@ This table maps the Pathway problem-statement signals to the BDH State Microscop
 | No login/API dependency | Static React artifact, local synthetic fixtures | Clean run without environment variables |
 | Source transparency | Primary links, source/license record, AI disclosure | README and docs |
 | Separate 600–800 word technical blog | Topic 9 essay on observability constraints in latent reasoning | `docs/BLOG.md` and generated PDF |
-| Optional deeper interaction without confusing evidence | API co-review of a bounded, engine-derived trace, with optional Grok route | Server-only endpoint; layer labelled “model commentary, not evidence,” actual responder named |
+| Optional deeper interaction without confusing evidence | API co-review of a bounded, engine-derived trace through Groq-hosted GPT-OSS 120B | Server-only endpoint with deterministic fallback; layer labelled “model commentary, not evidence,” actual responder named |
 
 ## Judging-dimension coverage
 

@@ -1,6 +1,5 @@
-import { generateText } from 'ai'
-
-const MODEL = 'spacexai/grok-4.1-fast-non-reasoning'
+const MODEL = 'openai/gpt-oss-120b'
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 const VALUE_LABELS = ['amber', 'violet', 'mint'] as const
 
 const LENSES = {
@@ -10,6 +9,21 @@ const LENSES = {
 } as const
 
 type Lens = keyof typeof LENSES
+
+type GroqResponse = {
+  model?: string
+  choices?: Array<{
+    message?: {
+      content?: string
+    }
+  }>
+}
+
+function groqApiKey() {
+  return (globalThis as {
+    process?: { env?: Record<string, string | undefined> }
+  }).process?.env?.GROQ_API_KEY
+}
 
 function json(body: unknown, status = 200, cache = false) {
   return Response.json(body, {
@@ -87,25 +101,59 @@ export async function GET(request: Request) {
   ].join('\n')
 
   try {
-    const result = await generateText({
-      model: MODEL,
-      system: [
-        'You are a skeptical scientific co-reviewer inside an interactive ML exhibit.',
-        'Use only the supplied observation. Do not invent paper results or imply trained-model evidence.',
-        'Return at most three compact bullet points and 150 words.',
-        'Explicitly label statements as Observation, Inference, or Next test.',
-      ].join(' '),
-      prompt: `${observation}\n\nRequested lens: ${LENSES[lens]}`,
-      temperature: 0.2,
-      maxOutputTokens: 240,
-    })
+    const apiKey = groqApiKey()
+    if (!apiKey) throw new Error('GROQ_API_KEY is not configured')
 
-    return json({ commentary: result.text, model: MODEL, lens, observation }, 200, true)
+    const response = await fetch(GROQ_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: MODEL,
+        messages: [
+          {
+            role: 'system',
+            content: [
+              'You are a skeptical scientific co-reviewer inside an interactive ML exhibit.',
+              'Use only the supplied observation. Do not invent paper results or imply trained-model evidence.',
+              'Return at most three compact bullet points and 150 words.',
+              'Explicitly label statements as Observation, Inference, or Next test.',
+            ].join(' '),
+          },
+          {
+            role: 'user',
+            content: `${observation}\n\nRequested lens: ${LENSES[lens]}`,
+          },
+        ],
+        temperature: 0.2,
+        reasoning_effort: 'low',
+        max_completion_tokens: 384,
+      }),
+      signal: AbortSignal.timeout(12_000),
+    })
+    if (!response.ok) throw new Error(`Groq returned HTTP ${response.status}`)
+
+    const result = (await response.json()) as GroqResponse
+    const commentary = result.choices?.[0]?.message?.content?.trim()
+    if (!commentary) throw new Error('Groq returned no visible commentary')
+
+    return json({
+      commentary,
+      model: `Groq · ${result.model ?? MODEL}`,
+      mode: 'model',
+      lens,
+      observation,
+    }, 200, true)
   } catch (error) {
-    console.warn('Grok route unavailable; serving deterministic co-review', error)
+    console.warn(
+      'Groq route unavailable; serving deterministic co-review',
+      error instanceof Error ? error.message : 'Unknown error',
+    )
     return json({
       commentary: fallbackCommentary(lens, prediction, margin),
-      model: 'Deterministic API co-review · Grok route unavailable',
+      model: 'Deterministic API co-review · Groq unavailable',
       mode: 'fallback',
       lens,
       observation,

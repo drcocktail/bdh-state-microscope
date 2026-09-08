@@ -13,7 +13,7 @@
 
 ## External software dependencies
 
-React, React DOM, Vite, TypeScript, Vitest, jsdom, Testing Library, and the Vercel AI SDK are used under their upstream licenses. Exact resolved packages are recorded in `pnpm-lock.yaml`. No dependency source is copied into application code.
+React, React DOM, Vite, TypeScript, Vitest, jsdom, and Testing Library are used under their upstream licenses. Exact resolved packages are recorded in `pnpm-lock.yaml`. No dependency source is copied into application code.
 
 ## External research
 
@@ -35,14 +35,14 @@ The attached `Pathway PS.pdf` was used as requirements input. It is not copied i
 - External datasets: none.
 - Personal or user data: none.
 - Model weights: none.
-- API calls: the optional essay companion calls a repository-authored server endpoint. It returns a trace-aware deterministic co-review and attempts a Grok 4.1 Fast co-review through Vercel AI Gateway when that route is available. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
-- Browser accounts or shipped secrets: none. The optional server endpoint authenticates to Vercel AI Gateway with deployment-bound OIDC.
+- API calls: the optional essay companion calls a repository-authored server endpoint. It requests a co-review from Groq-hosted GPT-OSS 120B and returns a trace-aware deterministic response when that route is unavailable. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
+- Browser accounts or shipped secrets: none. The optional server endpoint reads `GROQ_API_KEY` only from the server environment; no credential is embedded in the client bundle or repository.
 - Precomputed external scientific results: none.
 - Runtime inputs: deterministic synthetic vectors produced in local JavaScript. API commentary—deterministic fallback or stochastic model output—is interpretation, not evidence, and is neither required nor used by the engine.
 
 ## AI assistance disclosure
 
-OpenAI Codex assisted with requirements analysis, research, concept selection, implementation, tests, documentation, and browser QA. The runtime endpoint returns a deterministic co-review and can optionally call Grok 4.1 Fast for one selected trace; the interface names the actual responder and labels the whole layer “not evidence.” All resulting code and claims remain the submitting team’s responsibility to inspect, run, and defend.
+OpenAI Codex assisted with requirements analysis, research, concept selection, implementation, tests, documentation, and browser QA. The runtime endpoint can call Groq-hosted GPT-OSS 120B for one selected trace and otherwise returns a deterministic co-review; the interface names the actual responder and labels the whole layer “not evidence.” All resulting code and claims remain the submitting team’s responsibility to inspect, run, and defend.
 
 ## Submission license
 

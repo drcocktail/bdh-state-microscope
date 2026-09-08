@@ -611,7 +611,7 @@ function ResearchInterlocutor() {
           <h2 id="interlocutor-title">Interrogate the silent state.</h2>
         </div>
         <div className="interlocutor-intro">
-          <p>The blog argues that latent reasoning becomes testable through controlled interventions. Pick a live trace and ask the research endpoint to challenge, connect, or teach it. Grok is used when the gateway is available; a trace-aware deterministic co-review keeps the exhibit functional otherwise. Neither path receives your text, source code, or secrets.</p>
+          <p>The blog argues that latent reasoning becomes testable through controlled interventions. Pick a live trace and ask the research endpoint to challenge, connect, or teach it. Groq runs a bounded GPT-OSS 120B co-review; a trace-aware deterministic response keeps the exhibit functional if the model route is unavailable. Neither path receives your text, source code, or secrets.</p>
           <a href="/dataforge-latent-reasoning-blog.pdf" target="_blank" rel="noreferrer">Open the required 600–800-word blog PDF ↗</a>
         </div>
       </div>
@@ -671,7 +671,7 @@ function ResearchInterlocutor() {
         <article className="interlocutor-response">
           <div className="interlocutor-response__heading">
             <span className="interlocutor-label">3 · Interpretive co-review</span>
-            <small>{modelName || 'API co-review · Grok route when available'}</small>
+            <small>{modelName || 'API co-review · Groq + GPT-OSS 120B'}</small>
           </div>
           {status === 'idle' && <p className="interlocutor-placeholder">Generate a bounded critique of this exact trace. The response is interpretation—not a measurement, oracle, or citation.</p>}
           {status === 'loading' && <p className="interlocutor-placeholder" aria-live="polite">Interrogating the trace…</p>}

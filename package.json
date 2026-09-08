@@ -12,7 +12,6 @@
     "check": "npm run test && npm run build"
   },
   "dependencies": {
-    "ai": "7.0.93",
     "react": "latest",
     "react-dom": "latest"
   },

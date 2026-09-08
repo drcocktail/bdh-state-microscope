@@ -54,7 +54,7 @@ describe('BDH State Microscope learning journey', () => {
     expect(screen.getByText('[0, 0, 0]')).toBeInTheDocument()
   })
 
-  it('keeps the optional Grok layer separate from deterministic evidence', () => {
+  it('keeps the optional Groq layer separate from deterministic evidence', () => {
     render(<App />)
 
     expect(screen.getByText('MODEL COMMENTARY · NOT EVIDENCE')).toBeInTheDocument()
