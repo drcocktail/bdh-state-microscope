@@ -1,8 +1,7 @@
 import { generateText } from 'ai'
-import { argMax, runRecurrent, targetMargin } from '../src/engine/microscope'
-import { VALUE_LABELS, buildAssociationScenario } from '../src/engine/scenarios'
 
 const MODEL = 'spacexai/grok-4.1-fast-non-reasoning'
+const VALUE_LABELS = ['amber', 'violet', 'mint'] as const
 
 const LENSES = {
   falsify: 'Propose the single strongest next falsification test and name the main confound in the current fixture.',
@@ -28,6 +27,8 @@ export default async function handler(request: Request) {
   const lens = url.searchParams.get('lens') as Lens | null
   const overlapPercent = Number(url.searchParams.get('overlap'))
   const itemCount = Number(url.searchParams.get('load'))
+  const scoresText = url.searchParams.get('scores') ?? ''
+  const suppliedMargin = Number(url.searchParams.get('margin'))
 
   if (!lens || !(lens in LENSES)) return json({ error: 'Unknown analysis lens.' }, 400)
   if (!Number.isInteger(overlapPercent) || overlapPercent < 0 || overlapPercent > 95 || overlapPercent % 5 !== 0) {
@@ -36,17 +37,23 @@ export default async function handler(request: Request) {
   if (!Number.isInteger(itemCount) || itemCount < 1 || itemCount > 7) {
     return json({ error: 'Load must be an integer from 1 to 7.' }, 400)
   }
+  if (!/^-?\d{1,2}\.\d{3},-?\d{1,2}\.\d{3},-?\d{1,2}\.\d{3}$/.test(scoresText)) {
+    return json({ error: 'Scores must contain exactly three bounded, three-decimal values.' }, 400)
+  }
 
-  const overlap = overlapPercent / 100
-  const scenario = buildAssociationScenario({ overlap, itemCount })
-  const recurrent = runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' })
-  const output = recurrent.outputs[scenario.queryIndex]
-  const prediction = argMax(output)
-  const margin = targetMargin(output, scenario.targetIndex)
+  const output = scoresText.split(',').map(Number)
+  if (output.some((value) => !Number.isFinite(value) || Math.abs(value) > 20)) {
+    return json({ error: 'A score is outside the accepted range.' }, 400)
+  }
+  const prediction = output.indexOf(Math.max(...output))
+  const margin = output[0] - Math.max(output[1], output[2])
+  if (!Number.isFinite(suppliedMargin) || Math.abs(suppliedMargin - margin) > 0.006) {
+    return json({ error: 'The supplied margin is inconsistent with the rounded scores.' }, 400)
+  }
 
   const observation = [
     `Synthetic fixture: ${itemCount} association writes, ${overlapPercent}% shared key direction, RoPE enabled.`,
-    `Declared target: A -> ${VALUE_LABELS[scenario.targetIndex]}.`,
+    `Declared target: A -> ${VALUE_LABELS[0]}.`,
     `Computed output: [${output.map((value) => value.toFixed(3)).join(', ')}].`,
     `Argmax: ${VALUE_LABELS[prediction]}; target margin: ${margin.toFixed(3)}.`,
     'Independent full, recurrent, and state-carrying chunk evaluators are tested for numerical parity.',

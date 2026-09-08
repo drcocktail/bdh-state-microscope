@@ -35,7 +35,7 @@ The attached `Pathway PS.pdf` was used as requirements input. It is not copied i
 - External datasets: none.
 - Personal or user data: none.
 - Model weights: none.
-- API calls: the optional essay companion calls a repository-authored server endpoint, which sends one finite, engine-derived observation to Grok 4.1 Fast through Vercel AI Gateway. Inputs are limited to a declared analysis lens, 5-point overlap increment, and integer load.
+- API calls: the optional essay companion calls a repository-authored server endpoint, which sends one bounded, engine-derived observation to Grok 4.1 Fast through Vercel AI Gateway. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
 - Browser accounts or shipped secrets: none. The optional server endpoint authenticates to Vercel AI Gateway with deployment-bound OIDC.
 - Precomputed external scientific results: none.
 - Runtime inputs: deterministic synthetic vectors produced in local JavaScript. Model commentary is stochastic interpretation, not evidence, and is neither required nor used by the engine.

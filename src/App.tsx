@@ -587,6 +587,8 @@ function ResearchInterlocutor() {
         lens,
         overlap: String(overlapPercent),
         load: String(itemCount),
+        scores: output.map((value) => value.toFixed(3)).join(','),
+        margin: margin.toFixed(3),
       })
       const response = await fetch(`/api/explain?${query}`)
       const payload = await response.json() as { commentary?: string; error?: string; model?: string }
@@ -679,7 +681,7 @@ function ResearchInterlocutor() {
           <button type="button" onClick={askModel} disabled={status === 'loading'}>
             {status === 'loading' ? 'Asking Grok…' : status === 'ready' ? 'Ask Grok again' : 'Ask Grok to interrogate this result'}
           </button>
-          <small className="interlocutor-boundary">Only finite controls are accepted; responses are cached. Model text is never used to calculate or validate the experiment.</small>
+          <small className="interlocutor-boundary">Only bounded, internally checked trace summaries are accepted; responses are cached. Model text is never used to calculate or validate the experiment.</small>
         </article>
       </div>
 

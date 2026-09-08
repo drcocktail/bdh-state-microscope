@@ -5,3 +5,4 @@ tmp/
 output/playwright/
 *.tsbuildinfo
 .DS_Store
+.vercel
