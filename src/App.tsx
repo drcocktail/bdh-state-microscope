@@ -594,7 +594,7 @@ function ResearchInterlocutor() {
       const payload = await response.json() as { commentary?: string; error?: string; model?: string }
       if (!response.ok || !payload.commentary) throw new Error(payload.error ?? 'No commentary returned.')
       setCommentary(payload.commentary)
-      setModelName(payload.model ?? 'Grok via Vercel AI Gateway')
+      setModelName(payload.model ?? 'API research co-review')
       setStatus('ready')
     } catch (error) {
       setCommentary(error instanceof Error ? error.message : 'The model endpoint is unavailable.')
@@ -611,7 +611,7 @@ function ResearchInterlocutor() {
           <h2 id="interlocutor-title">Interrogate the silent state.</h2>
         </div>
         <div className="interlocutor-intro">
-          <p>The blog argues that latent reasoning becomes testable through controlled interventions. Pick a live trace and ask Grok to challenge, connect, or teach it. The model receives only the declared numeric summary—not your text, source code, or secrets.</p>
+          <p>The blog argues that latent reasoning becomes testable through controlled interventions. Pick a live trace and ask the research endpoint to challenge, connect, or teach it. Grok is used when the gateway is available; a trace-aware deterministic co-review keeps the exhibit functional otherwise. Neither path receives your text, source code, or secrets.</p>
           <a href="/dataforge-latent-reasoning-blog.pdf" target="_blank" rel="noreferrer">Open the required 600–800-word blog PDF ↗</a>
         </div>
       </div>
@@ -671,7 +671,7 @@ function ResearchInterlocutor() {
         <article className="interlocutor-response">
           <div className="interlocutor-response__heading">
             <span className="interlocutor-label">3 · Stochastic co-review</span>
-            <small>{modelName || 'Grok 4.1 Fast · Vercel AI Gateway'}</small>
+            <small>{modelName || 'API co-review · Grok route when available'}</small>
           </div>
           {status === 'idle' && <p className="interlocutor-placeholder">Generate a bounded critique of this exact trace. The response is interpretation—not a measurement, oracle, or citation.</p>}
           {status === 'loading' && <p className="interlocutor-placeholder" aria-live="polite">Interrogating the trace…</p>}
@@ -679,7 +679,7 @@ function ResearchInterlocutor() {
             <div className={`interlocutor-commentary ${status === 'error' ? 'is-error' : ''}`} aria-live="polite">{commentary}</div>
           )}
           <button type="button" onClick={askModel} disabled={status === 'loading'}>
-            {status === 'loading' ? 'Asking Grok…' : status === 'ready' ? 'Ask Grok again' : 'Ask Grok to interrogate this result'}
+            {status === 'loading' ? 'Interrogating…' : status === 'ready' ? 'Run another co-review' : 'Interrogate this result'}
           </button>
           <small className="interlocutor-boundary">Only bounded, internally checked trace summaries are accepted; responses are cached. Model text is never used to calculate or validate the experiment.</small>
         </article>

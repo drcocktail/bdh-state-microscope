@@ -58,7 +58,7 @@ describe('BDH State Microscope learning journey', () => {
     render(<App />)
 
     expect(screen.getByText('MODEL COMMENTARY · NOT EVIDENCE')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Grok to interrogate this result' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Interrogate this result' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: /Open the required 600–800-word blog PDF/ })).toHaveAttribute(
       'href',
       '/dataforge-latent-reasoning-blog.pdf',

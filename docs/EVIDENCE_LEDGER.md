@@ -20,7 +20,7 @@ This ledger separates algebra, locally executed results, paper-supported context
 | Delta-rule fast weights have established linear-attention precedents | Paper-supported context | DeltaNet, Parallel DeltaNet, Gated DeltaNet | These works are architectural priors, not evidence for a BDH improvement here |
 | Associative recall is a meaningful efficient-model stress test | Paper-supported context | Zoology / MQAR | Does not establish performance on the current synthetic fixture or rank BDH |
 | A delta-style BDH write would improve a trained model | Hypothesis | No supporting trained-model result in this repository | Requires matched training, language evaluation, compute, and ablations |
-| Grok commentary validates or measures the mechanism | Explicitly excluded | Runtime model output is labelled “not evidence” and receives only an engine-derived summary | The deterministic engine, tests, and cited primary sources remain the only evidence layers |
+| API/Grok commentary validates or measures the mechanism | Explicitly excluded | Runtime interpretation is labelled “not evidence” and receives only an engine-derived summary | The deterministic engine, tests, and cited primary sources remain the only evidence layers |
 
 ## Reproduced result record
 

@@ -20,6 +20,31 @@ function json(body: unknown, status = 200, cache = false) {
   })
 }
 
+function fallbackCommentary(lens: Lens, prediction: number, margin: number) {
+  const verdict = prediction === 0 ? 'holds' : 'breaks'
+  const common = `Observation — Recall ${verdict}: the target margin is ${margin.toFixed(3)}, while all three execution routes retain numerical parity.`
+
+  if (lens === 'connect') {
+    return [
+      `• ${common}`,
+      '• Inference — The trace isolates a limitation of the fixed associative state used by this BDH-style attention mechanism; it does not identify a failure inside a trained BDH or BDH-CQ model.',
+      '• Next test — Train matched additive- and delta-write checkpoints, then compare language loss and held-out associative recall under identical data, compute, precision, and tokenization.',
+    ].join('\n')
+  }
+  if (lens === 'teach') {
+    return [
+      `• ${common}`,
+      '• Inference — “Parallel equals recurrent” describes how the same computation is scheduled. It does not promise that the shared state kept enough distinct addressing information to recall the target.',
+      '• Check question — If chunk size changes but the carried state is exact, should the output or the interference boundary move?',
+    ].join('\n')
+  }
+  return [
+    `• ${common}`,
+    '• Inference — This constructed trace shows sufficiency, not universality: overlap plus load can create interference here, but the fixture does not estimate failure rates in learned representations.',
+    '• Next test — Randomize key bases and distractor values across preregistered seeds at matched overlap/load; falsify the mechanism claim if margin behavior is not stable while parity remains below 1e-10.',
+  ].join('\n')
+}
+
 export async function GET(request: Request) {
   if (request.method !== 'GET') return json({ error: 'Method not allowed.' }, 405)
 
@@ -77,7 +102,13 @@ export async function GET(request: Request) {
 
     return json({ commentary: result.text, model: MODEL, lens, observation }, 200, true)
   } catch (error) {
-    console.error('AI Gateway request failed', error)
-    return json({ error: 'The research interlocutor is temporarily unavailable; the deterministic experiment remains valid.' }, 503)
+    console.warn('Grok route unavailable; serving deterministic co-review', error)
+    return json({
+      commentary: fallbackCommentary(lens, prediction, margin),
+      model: 'Deterministic API co-review · Grok route unavailable',
+      mode: 'fallback',
+      lens,
+      observation,
+    }, 200, true)
   }
 }

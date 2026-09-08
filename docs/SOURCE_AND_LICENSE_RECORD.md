@@ -35,14 +35,14 @@ The attached `Pathway PS.pdf` was used as requirements input. It is not copied i
 - External datasets: none.
 - Personal or user data: none.
 - Model weights: none.
-- API calls: the optional essay companion calls a repository-authored server endpoint, which sends one bounded, engine-derived observation to Grok 4.1 Fast through Vercel AI Gateway. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
+- API calls: the optional essay companion calls a repository-authored server endpoint. It returns a trace-aware deterministic co-review and attempts a Grok 4.1 Fast co-review through Vercel AI Gateway when that route is available. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
 - Browser accounts or shipped secrets: none. The optional server endpoint authenticates to Vercel AI Gateway with deployment-bound OIDC.
 - Precomputed external scientific results: none.
-- Runtime inputs: deterministic synthetic vectors produced in local JavaScript. Model commentary is stochastic interpretation, not evidence, and is neither required nor used by the engine.
+- Runtime inputs: deterministic synthetic vectors produced in local JavaScript. API commentary—deterministic fallback or stochastic model output—is interpretation, not evidence, and is neither required nor used by the engine.
 
 ## AI assistance disclosure
 
-OpenAI Codex assisted with requirements analysis, research, concept selection, implementation, tests, documentation, and browser QA. Grok 4.1 Fast is optionally called at runtime to co-review one selected trace; its output is visibly labelled “not evidence.” All resulting code and claims remain the submitting team’s responsibility to inspect, run, and defend.
+OpenAI Codex assisted with requirements analysis, research, concept selection, implementation, tests, documentation, and browser QA. The runtime endpoint returns a deterministic co-review and can optionally call Grok 4.1 Fast for one selected trace; the interface names the actual responder and labels the whole layer “not evidence.” All resulting code and claims remain the submitting team’s responsibility to inspect, run, and defend.
 
 ## Submission license
 
