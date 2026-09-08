@@ -20,7 +20,7 @@ function json(body: unknown, status = 200, cache = false) {
   })
 }
 
-export default async function handler(request: Request) {
+export async function GET(request: Request) {
   if (request.method !== 'GET') return json({ error: 'Method not allowed.' }, 405)
 
   // Vercel's Web Request adapter can expose a relative URL in Node functions.
