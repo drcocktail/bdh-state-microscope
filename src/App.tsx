@@ -675,8 +675,9 @@ function ResearchInterlocutor() {
           </div>
           {status === 'idle' && <p className="interlocutor-placeholder">Generate a bounded critique of this exact trace. The response is interpretation—not a measurement, oracle, or citation.</p>}
           {status === 'loading' && <p className="interlocutor-placeholder" aria-live="polite">Interrogating the trace…</p>}
-          {(status === 'ready' || status === 'error') && (
-            <div className={`interlocutor-commentary ${status === 'error' ? 'is-error' : ''}`} aria-live="polite">{commentary}</div>
+          {status === 'ready' && <CommentaryPoints commentary={commentary} />}
+          {status === 'error' && (
+            <div className="interlocutor-commentary is-error" aria-live="polite">{commentary}</div>
           )}
           <button type="button" onClick={askModel} disabled={status === 'loading'}>
             {status === 'loading' ? 'Interrogating…' : status === 'ready' ? 'Run another co-review' : 'Interrogate this result'}
@@ -695,13 +696,58 @@ function ResearchInterlocutor() {
   )
 }
 
+function CommentaryPoints({ commentary }: { commentary: string }) {
+  const points = commentary
+    .split(/\n+/)
+    .map((line) => line.trim().replace(/^[-•]\s*/, '').replaceAll('**', ''))
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^(Observation|Inference|Next test|Check question)\s*[:—-]?\s*(.*)$/i)
+      return match ? { label: match[1], text: match[2] } : { label: 'Co-review', text: line }
+    })
+
+  return (
+    <ol className="interlocutor-commentary" aria-live="polite">
+      {points.map((point, index) => (
+        <li key={`${point.label}-${index}`}>
+          <strong>{point.label}</strong>
+          <span>{point.text}</span>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
 function TeachBack() {
   const [answer, setAnswer] = useState('')
   const [compared, setCompared] = useState(false)
   const normalized = answer.toLowerCase()
-  const substantive = answer.trim().length >= 36
-  const mentionsState = /state|matrix|fixed|compress/.test(normalized)
-  const mentionsDistinction = /overlap|collision|interference|distin|same|history|equiv/.test(normalized)
+  const hasAttempt = answer.trim().length > 0
+  const criteria = [
+    {
+      label: 'Exact computation',
+      met: /exact|equiv|identical|parity|same (answer|output|computation|result)/.test(normalized),
+      guidance: 'Say that the full, recurrent, and chunked routes compute the same causal result.',
+    },
+    {
+      label: 'Fixed-state mechanism',
+      met: /state|matrix|recurrent|chunk|parallel|fixed|compress|history/.test(normalized),
+      guidance: 'Name the carried fixed-shape state that folds the growing attention history.',
+    },
+    {
+      label: 'Memory failure boundary',
+      met: /overlap|collision|interference|memory|address|wrong|fail|recall|lost|confus|quality/.test(normalized),
+      guidance: 'Explain that overlapping addresses can make every exact route return the same wrong recall.',
+    },
+  ]
+  const captured = criteria.filter((criterion) => criterion.met).length
+  const feedbackTitle = captured === 3
+    ? 'Mechanism captured.'
+    : captured === 2
+      ? 'Almost there—one boundary is missing.'
+      : captured === 1
+        ? 'You have one piece. Connect the computation to the failure.'
+        : 'Start with the invariant, then name the failure.'
   return (
     <section className="teachback" aria-labelledby="teachback-title">
       <div><p className="eyebrow">Teach it back</p><h2 id="teachback-title">What is exact—and what can still fail?</h2><p>Explain the distinction in your own words. A strong answer separates computational equivalence from memory quality.</p></div>
@@ -714,13 +760,35 @@ function TeachBack() {
           placeholder="The full attention matrix and recurrent state…"
           rows={4}
         />
-        <button type="button" disabled={!substantive} onClick={() => setCompared(true)}>Compare with the mechanism</button>
+        <button
+          type="button"
+          disabled={!hasAttempt}
+          aria-describedby="teachback-hint"
+          onClick={() => setCompared(true)}
+        >
+          Compare with the mechanism
+        </button>
+        <small id="teachback-hint" className="teachback__hint">Any honest attempt works—even one sentence.</small>
         {compared && (
           <div className="teachback__feedback" aria-live="polite">
-            <strong>{mentionsState && mentionsDistinction ? 'Mechanism captured.' : 'One distinction is still missing.'}</strong>
-            <p>{mentionsState && mentionsDistinction
-              ? 'You separated the exact state-form computation from the interference caused when different associations share state directions.'
-              : 'Name both the exact equivalence of the two computations and the information collision that can make both computations return the same wrong recall.'}</p>
+            <div className="teachback__score">
+              <strong>{feedbackTitle}</strong>
+              <span>{captured}/3 concepts captured</span>
+            </div>
+            <ul>
+              {criteria.map((criterion) => (
+                <li className={criterion.met ? 'is-captured' : 'is-missing'} key={criterion.label}>
+                  <span>{criterion.met ? 'Captured' : 'Missing'}</span>
+                  <strong>{criterion.label}</strong>
+                  <p>{criterion.guidance}</p>
+                </li>
+              ))}
+            </ul>
+            {captured < 3 && (
+              <p className="teachback__scaffold">
+                <strong>Try this scaffold:</strong> “The full, recurrent, and chunked forms are exactly equivalent because… Yet recall can still fail when…”
+              </p>
+            )}
           </div>
         )}
       </div>
