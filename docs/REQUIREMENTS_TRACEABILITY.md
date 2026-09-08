@@ -48,7 +48,8 @@ The exact test count is descriptive, not load-bearing; `pnpm check` is the sourc
 
 | Requirement | Repository status | Team action |
 |---|---|---|
-| Public working artifact URL | Not fabricated | Deploy `dist/` to a public sign-in-free host |
-| Public source repository URL | Not fabricated | Publish this repository |
+| Public working artifact URL | Complete and anonymously HTTP-checked | `https://bdh-state-microscope.vercel.app` |
+| Public source repository URL | Complete and public | `https://github.com/drcocktail/bdh-state-microscope` |
+| Blog PDF URL | Complete; downloaded hash matches versioned PDF | `https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf` |
 | Submission metadata | Not owned by code | Enter team/member details in the official form |
 | Deadline/rules | Time-sensitive external fact | Re-check the official event page immediately before submission |

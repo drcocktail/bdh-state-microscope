@@ -665,12 +665,12 @@ function ResearchInterlocutor() {
             <small>target margin {margin > 0 ? '+' : ''}{margin.toFixed(3)}</small>
           </div>
           <OutputBars output={output} targetIndex={scenario.targetIndex} />
-          <p>Computed locally with RoPE on. This trace is the evidence supplied to the model.</p>
+          <p>Computed locally with RoPE on. This trace is the evidence supplied to the co-review endpoint.</p>
         </article>
 
         <article className="interlocutor-response">
           <div className="interlocutor-response__heading">
-            <span className="interlocutor-label">3 · Stochastic co-review</span>
+            <span className="interlocutor-label">3 · Interpretive co-review</span>
             <small>{modelName || 'API co-review · Grok route when available'}</small>
           </div>
           {status === 'idle' && <p className="interlocutor-placeholder">Generate a bounded critique of this exact trace. The response is interpretation—not a measurement, oracle, or citation.</p>}

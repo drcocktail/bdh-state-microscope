@@ -190,4 +190,10 @@ OpenAI Codex assisted with problem-statement analysis, literature research, conc
 
 ## Public deliverables
 
-The sign-in-free deployment URL and public repository URL are added here only after both endpoints are live and independently checked. The submission blog is versioned at `output/pdf/dataforge-latent-reasoning-blog.pdf`.
+- Sign-in-free interactive artifact: [bdh-state-microscope.vercel.app](https://bdh-state-microscope.vercel.app)
+- Public source repository: [github.com/drcocktail/bdh-state-microscope](https://github.com/drcocktail/bdh-state-microscope)
+- Direct blog PDF: [Reasoning Without a Transcript Is Not Reasoning Without Evidence](https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf)
+- Versioned blog PDF: [`output/pdf/dataforge-latent-reasoning-blog.pdf`](output/pdf/dataforge-latent-reasoning-blog.pdf)
+- Form-ready submission copy and demo route: [`SUBMISSION.md`](SUBMISSION.md)
+
+On 8 September 2026, the artifact and PDF returned anonymous HTTP 200 responses with Vercel SSO protection disabled. The downloaded PDF matched the repository file at SHA-256 `2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9`.

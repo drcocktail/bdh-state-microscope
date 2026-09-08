@@ -3,6 +3,7 @@ dist/
 .playwright-cli/
 tmp/
 output/playwright/
+output/submission/
 *.tsbuildinfo
 .DS_Store
 .vercel
