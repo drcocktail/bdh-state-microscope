@@ -80,7 +80,7 @@ export function sanitizeModelReview(raw: unknown, explanation: string, fallback:
     const entry = (value.concepts as Array<Record<string, unknown>>).find(c => String(c?.id) === concept.id) ?? {}
     // Models like to quote the whole answer back: keep a short phrase that is still the reader's own.
     const quote = typeof entry.quote === 'string' ? entry.quote.trim().split(/\s+/).slice(0, 14).join(' ').slice(0, 120) : ''
-    const note = typeof entry.note === 'string' && entry.note.trim() ? entry.note.trim().slice(0, 240) : concept.guidance
+    const note = typeof entry.note === 'string' && entry.note.trim() ? entry.note.trim().replace(/[\u2013\u2014]/g, ', ').slice(0, 240) : concept.guidance
     return {
       id: concept.id,
       label: concept.label,

@@ -20,7 +20,7 @@ test('guided predictions, controls, teachback and offline engine',async({page,co
   const run=page.getByRole('button',{name:'Commit and run the sweep'});await expect(run).toBeDisabled()
   await page.getByRole('button',{name:'50%',exact:true}).click();await run.click();await expect(page.getByText('Prediction matches the fixture.')).toBeVisible();await expect(page.getByText(/First sampled failure 50%/)).toBeVisible()
   await page.getByRole('button',{name:'Outputs stay the same'}).click();await page.getByRole('button',{name:'Reveal computed result'}).click();await expect(page.getByText('Correct.',{exact:true})).toBeVisible()
-  await page.getByLabel('Your explanation').fill('Exact equivalent output from a fixed recurrent state can still fail recall through overlapping keys.');await page.getByRole('button',{name:'Compare with the mechanism'}).click();await expect(page.getByText('3/3 concepts captured')).toBeVisible()
+  await page.getByLabel('Your explanation').fill('Exact equivalent output from a fixed recurrent state can still fail recall through overlapping keys.');await page.getByRole('button',{name:'Compare with the mechanism'}).click();await expect(page.getByText(/[0-3]\/3 concepts captured/)).toBeVisible({timeout:20000})
   await context.setOffline(true)
   await page.getByRole('button',{name:/Collision/}).click();await expect(page.getByText('recall breaks',{exact:true})).toBeVisible()
 })

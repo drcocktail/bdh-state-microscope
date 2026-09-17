@@ -46,6 +46,17 @@ e2e/                       Real browser correctness, accessibility and latency
 
 [S and engine semantics](docs/ENGINE_API.md), [defense derivations](docs/DEFENSE_NOTES.md), [generated results](docs/GENERATED_RESULTS.md), [source/license record](docs/SOURCE_AND_LICENSE_RECORD.md), [AI disclosure](docs/AI_DISCLOSURE.md).
 
+## The tutor route
+
+`api/tutor.ts` is the one server route. It reads a visitor's teach-back explanation, or comments on a live trace, using Groq (`openai/gpt-oss-120b`) via `GROQ_API_KEY` in the server environment.
+
+The model interprets; the engine decides. Every number it receives is computed in the browser and re-validated server side against the legal control ranges, quotes must appear verbatim in the visitor's own text, and the configuration it proposes is clamped and must differ from the trace on screen, so the page can run it and show whether the claim survives. With no key, no network or a bad key, the route answers from a deterministic rubric and the page says which produced the text. `pnpm content:check` fails the build if a key or the model endpoint reaches the client bundle.
+
+```bash
+curl -s -X POST http://127.0.0.1:4173/api/tutor -H 'Content-Type: application/json' \
+  -d '{"mode":"teachback","explanation":"...","trace":{"overlap":70,"load":5,"scores":[1,2.46,1.64],"margin":-1.46}}'
+```
+
 ## Reproduce
 
 Node 24, pnpm 11.19.0 and Python 3.12 are the CI verification environment. Dependencies are exact-pinned. Python/pypdf is only needed for the PDF read-back gate, not the website runtime.
