@@ -12,7 +12,7 @@ function Curves({ curves, dimension }: {curves:{label:string;points:CurvePoint[]
 function CapacityChapter({lift=false}:{lift?:boolean}) {
   const prefix=lift?'lift':'dim'
   const [dimension,setDimension]=useUrlNumber(`${prefix}N`,16,4,32)
-  const [count,setCount]=useUrlNumber(`${prefix}T`,lift?128:64,1,128)
+  const [count,setCount]=useUrlNumber(`${prefix}T`,lift?128:64,1,lift?128:4*dimension)
   const [classes,setClasses]=useUrlNumber(`${prefix}C`,8,2,16)
   const [seed,setSeed]=useUrlNumber(`${prefix}Seed`,17,0,99999)
   const [orthogonal,setOrthogonal]=useUrlNumber('orthogonalKeys',0,0,1)

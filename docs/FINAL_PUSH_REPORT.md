@@ -37,16 +37,18 @@ The original eight-page PS was independently checked against the attached brief 
 
 - Frozen install: passed on pnpm 11.19.0.
 - Strict TypeScript and all three Vite entries: passed.
-- Unit/property tests: 40 across 4 files. Includes 240 seeded sequences, two bases (480 evaluations), random N/D/T and chunk schedules; 128 time combinations; beta/orthogonality; loads 1 to 7; affine products; independent brute-force fault comparison.
+- Unit/property tests: 41 across 4 files. Includes 240 seeded sequences, two bases (480 evaluations), random N/D/T and chunk schedules; 128 time combinations; beta/orthogonality; loads 1 to 7; strict positive near-ties; affine products; independent brute-force fault comparison.
 - Browser tests: 15. Mobile 390 px and desktop 1440 px, all three pages, no page/console errors or horizontal overflow; presets, two prediction flows, teach-back, offline operation, seeded worker/lift/time, sealed/restricted rounds, keyboard source popover, URL state, PDF/routes/hash and WCAG 2 A/AA plus 2.1 AA axe checks. Automated checks do not establish universal accessibility.
-- Guided input-to-paint, two animation frames: the completed 15-test run measured 24.3 to 33.8 ms, below the adopted 100 ms gate. This is Chromium on this machine, not trained-model inference throughput.
+- Guided input-to-paint, two animation frames: the completed 15-test run measured 19.2 to 33.8 ms, below the adopted 100 ms gate. This is Chromium on this machine, not trained-model inference throughput.
 - Default worker sweeps completed within one second in browser checks; UI shows elapsed time. No universal latency guarantee or hardware saving is claimed.
 - Exact-state observation caching preserves every enumerated sequence in finite identifiability. The 364-sequence, five-intervention check fell from approximately 1675 ms to 13 ms in an isolated local tsx timing; this is an implementation diagnostic, not a model benchmark. Independent uncached trace comparisons check both seeds 17/18, budgets 0/1/3/5 and full/restricted menus.
 - Canonical essay: 662 body words excluding headings, citations and references. At least two recent primary references, BDH mention, limitation and judgment sections.
+- Source-of-truth gates: generated results must exactly match the committed engine replay. pypdf 6.10.0 reads the committed PDF essay and all visible references back against the current canonical Markdown, and checks reference URLs in PDF annotations. These gates fail on stale artifacts; PDF visual review remains a separate human/automation render check.
+- Automatic PR review raised five concrete findings. All were independently checked: pair-count and shared-neuron values now agree with engine bounds and normalized permalinks; lab strict recall uses margin > 0 with a positive near-tie regression; replay tables and PDF content have source-comparison gates. Historical CI runs below had 40 tests; the new near-tie test raises the final count to 41.
 - All 14 primary source HEAD links returned HTTP 200 in this run. External failures warn in CI.
 - Bundle guard: no interpretation API fetch or model-provider string. Built JS roughly 291 kB total uncompressed across shared/page/worker assets; largest shared JS about 62.4 kB gzip. Vite emits per-asset gzip report.
 - Separate v2 PDF: 2 pages, A4, tagged, embedded Manrope Type 3 glyph programs; extracted text and rendered pages reviewed. Source and citations resolve to canonical Markdown. Print ligatures are disabled for clean text extraction. v1 generator/source retained as archive.
-- Current v2 PDF SHA-256 `65917836de6cd99382d61319df47d3a9b94131b05d0771229f81ce9879b745d0`. Its interactive link points to the verified public review deployment, not the frozen production host's future blog path.
+- Current v2 PDF SHA-256 `92816df749edeaf7e954218d0e5576e1c306358141a7bd03b2ecebb1a73abc1a`. Its interactive link points to the stable public review alias, not the frozen production host's future blog path. The alias is reassigned only to preview deployments.
 - v1 PDF verified both locally and by anonymous production download, unchanged SHA-256 `2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9`.
 - Canonical Markdown SHA-256 `7dac7a5cf5181f75ccbf131f12fb949d1b4345d3dbb1199df11efcb0f28f1fc6`.
 

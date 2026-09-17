@@ -1,24 +1,37 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+
+function boundedNumber(key:string,value:number,fallback:number,min:number,max:number) {
+  const safe=Math.min(max,Math.max(min,Number.isFinite(value)?value:fallback))
+  if (/^base$|Base$/.test(key)) return safe === 10000 ? 10000 : 65536
+  if (/^(dim|lift)N$/.test(key)) return [4,8,16,32].includes(safe) ? safe : fallback
+  if (key === 'bytes') return safe === 4 ? 4 : 2
+  return /overlap|beta|gamma|alpha|activity/i.test(key)?safe:Math.round(safe)
+}
+
+function persistNumber(key:string,value:number) {
+  const url=new URL(window.location.href)
+  url.searchParams.set(key,String(value))
+  window.history.replaceState(null,'',url)
+}
 
 export function readNumber(key: string, fallback: number, min: number, max: number) {
   const raw = new URLSearchParams(window.location.search).get(key)
   const value = raw === null ? fallback : Number(raw)
-  const safe = Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback
-  if (/^base$|Base$/.test(key)) return safe === 10000 ? 10000 : 65536
-  if (/^(dim|lift)N$/.test(key)) return [4,8,16,32].includes(safe) ? safe : fallback
-  if (key === 'bytes') return safe === 4 ? 4 : 2
-  return /overlap|beta|gamma|alpha|activity/i.test(key) ? safe : Math.round(safe)
+  return boundedNumber(key,value,fallback,min,max)
 }
 
 export function useUrlNumber(key: string, fallback: number, min: number, max: number): [number, (v: number) => void] {
   const [value, setValue] = useState(() => readNumber(key, fallback, min, max))
-  return [value, (next: number) => {
-    const bounded = Number.isFinite(next) ? Math.min(max, Math.max(min, next)) : fallback
-    const safe = /overlap|beta|gamma|alpha|activity/i.test(key) ? bounded : Math.round(bounded)
+  const current=boundedNumber(key,value,fallback,min,max)
+  useEffect(()=>{
+    if(value!==current){setValue(current);persistNumber(key,current)}
+    const raw=new URLSearchParams(window.location.search).get(key)
+    if(raw!==null&&raw!==String(current))persistNumber(key,current)
+  },[value,current,key])
+  return [current, (next: number) => {
+    const safe=boundedNumber(key,next,fallback,min,max)
     setValue(safe)
-    const url = new URL(window.location.href)
-    url.searchParams.set(key, String(safe))
-    window.history.replaceState(null, '', url)
+    persistNumber(key,safe)
   }]
 }
 

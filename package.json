@@ -12,11 +12,13 @@
     "test:watch": "vitest",
     "typecheck": "tsc -b",
     "results": "tsx scripts/report_results.ts",
+    "results:check": "tsx scripts/report_results.ts --check",
     "content:check": "tsx scripts/content-check.ts",
     "links:check": "tsx scripts/link-check.ts",
     "pdf:v2": "tsx scripts/build_blog_pdf.ts",
+    "pdf:check": "tsx scripts/check_blog_pdf.ts",
     "e2e": "playwright test",
-    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm content:check && pnpm e2e"
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm content:check && pnpm results:check && pnpm pdf:check && pnpm e2e"
   },
   "dependencies": {
     "react": "19.2.8",

@@ -33,7 +33,7 @@ export function capacityCurve(keys: Matrix, classes: number, seed: number): Capa
   for (let prefix = 1; prefix <= keys.length; prefix++) {
     for (let query = 0; query < keys.length; query++) scores[query][labels[prefix-1]] += gram[query][prefix-1]
     let correct = 0
-    for (let query = 0; query < prefix; query++) if (targetMargin(scores[query],labels[query]) > 1e-12) correct++
+    for (let query = 0; query < prefix; query++) if (targetMargin(scores[query],labels[query]) > 0) correct++
     curve.push({ count:prefix,accuracy:correct/prefix })
   }
   const firstFailure = curve.find(p => p.accuracy < 0.9)

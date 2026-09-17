@@ -8,6 +8,8 @@ Original TypeScript engines, synthetic fixtures, React views, inline CSS/SVG gra
 
 React, Vite, TypeScript, Vitest, jsdom, Testing Library, tsx, Playwright and axe-core retain their upstream licenses. Exact versions and integrity records are in pnpm-lock.yaml. No dependency source is copied into app source. Chromium is a local/CI verification dependency, not shipped as website code.
 
+The PDF read-back gate uses pypdf 6.10.0, pinned in scripts/pdf-requirements.txt. It is a Python verification dependency, not website runtime code; its upstream license applies.
+
 ## Font
 
 The blog bundles unmodified Manrope variable font under SIL Open Font License 1.1. Copyright 2018 The Manrope Project Authors. License is included at public/fonts/OFL.txt. Source: https://github.com/google/fonts/tree/main/ofl/manrope, fetched 17 September 2026. File SHA-256: `3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6`. It is served locally and embedded/subsetted by Chromium in the PDF. The guided microscope retains its operating-system font stack and layout.

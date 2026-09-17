@@ -47,19 +47,21 @@ e2e/                       Real browser correctness, accessibility and latency
 
 ## Reproduce
 
-Node 24 and pnpm 11.19.0 are the CI environment. Dependencies are exact-pinned.
+Node 24, pnpm 11.19.0 and Python 3.12 are the CI verification environment. Dependencies are exact-pinned. Python/pypdf is only needed for the PDF read-back gate, not the website runtime.
 
 ```bash
 corepack enable
 pnpm install --frozen-lockfile
 pnpm exec playwright install chromium
+python3 -m venv tmp/pdf-check
+tmp/pdf-check/bin/python -m pip install -r scripts/pdf-requirements.txt
 pnpm dev
-pnpm check
+BLOG_CHECK_PYTHON=tmp/pdf-check/bin/python pnpm check
 pnpm results
 pnpm links:check
 ```
 
-The release gate typechecks, runs unit/property tests, builds all entries, checks content/hash/bundle rules and runs Playwright. External link failures warn. The 40 unit tests include 240 seeded sequences across two bases, 128 time combinations, fixture boundaries, beta forms, affine expansions and independent fault enumeration. Browser tests cover two sizes, offline behavior, keyboard/accessibility, routes, hashes, permalinks and two-frame input-to-paint. Exact latest counts and measured conditions are in the final report.
+The release gate typechecks, runs unit/property tests, builds all entries, checks content/hash/bundle rules, verifies the generated results against the current engine, reads the PDF body/references back against Markdown, and runs Playwright. External link failures warn. The 41 unit tests include 240 seeded sequences across two bases, 128 time combinations, fixture boundaries, beta forms, strict near-ties, affine expansions and independent fault enumeration. Browser tests cover two sizes, offline behavior, keyboard/accessibility, routes, hashes, bounded permalinks and two-frame input-to-paint. Exact latest counts and measured conditions are in the final report.
 
 To generate the separate PDF:
 
@@ -67,7 +69,7 @@ To generate the separate PDF:
 pnpm build
 pnpm preview --host 127.0.0.1 --port 4173
 # In another terminal:
-BLOG_PUBLIC_URL=https://bdh-state-microscope-al9ngfazj-drcocktails-projects.vercel.app pnpm pdf:v2
+BLOG_PUBLIC_URL=https://bdh-state-microscope-review-drcocktails-projects.vercel.app pnpm pdf:v2
 pnpm build
 ```
 

@@ -26,7 +26,7 @@ Best incompatible-address common read: [0.5, 0.5, 0]. MSE per target 0.166666666
 | 18 | 1024 | 0.05 | 13 | 128 | 128 | 0.028287 |
 | 19 | 1024 | 0.05 | 15 | 128 | 128 | 0.028341 |
 
-Capacity: first prefix below 90% strict class recall minus one. 128 pairs, 8 classes; dense results of 128 are right-censored. Lift thresholds calibrated on the same corpus. Seeds are independent synthetic corpora, not held-out language evidence.
+Capacity: first prefix below 90% strict class recall minus one. 128 pairs, 8 classes; any result of 128 is right-censored. Lift thresholds calibrated on the same corpus. Seeds are independent synthetic corpora, not held-out language evidence.
 
 Time identity: maximum parity 0.000e+0.
 Time rope: maximum parity 8.882e-16.

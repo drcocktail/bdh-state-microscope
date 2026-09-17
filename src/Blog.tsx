@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useEffect, useMemo, useState, type ReactNode } from 'react'
 import essay from '../content/blog/reasoning-without-a-transcript.md?raw'
 import { Citation, EvidenceBadge, ArtifactFooter } from './components/Evidence'
 import { sources, type SourceId } from './content/sources'
@@ -15,8 +15,11 @@ function Specimen() {
   const [preset,setPreset]=useUrlChoice('fault','coverage',['coverage','compute','binding'] as const)
   const [seed,setSeed]=useUrlNumber('specimenSeed',17,0,99999)
   const initial=faultControls(preset,seed)
-  const [steps,setSteps]=useUrlNumber('steps',initial.steps,0,12),[coverage,setCoverage]=useUrlNumber('coverage',Number(initial.coverage),0,1),[shared,setShared]=useUrlNumber('shared',initial.shared,0,8)
+  const [steps,setSteps]=useUrlNumber('steps',initial.steps,0,12),[coverage,setCoverage]=useUrlNumber('coverage',Number(initial.coverage),0,1)
   const [facts,setFacts]=useUrlNumber('facts',12,12,32),[neurons,setNeurons]=useUrlNumber('latentN',96,16,128),[active,setActive]=useUrlNumber('codeK',4,2,8)
+  const [sharedRequested,setShared]=useUrlNumber('shared',initial.shared,0,8)
+  const shared=Math.min(sharedRequested,active)
+  useEffect(()=>{if(sharedRequested!==shared)setShared(shared)},[sharedRequested,shared])
   const [coding,setCoding]=useUrlChoice('coding','distributed',['one-hot','distributed'] as const),[sealed,setSealed]=useState(true)
   const controls={seed:Math.round(seed),facts:Math.round(facts),neurons:Math.round(neurons),active:Math.round(active),distributed:coding==='distributed',steps:Math.round(steps),coverage:coverage===1,shared}
   const result=useMemo(()=>latentSystem(controls),[seed,facts,neurons,active,coding,steps,coverage,shared])

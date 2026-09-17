@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { runParallel, runRecurrent, runChunked, maxAbsDifference, targetMargin, type AttentionToken } from './microscope'
 import { buildAssociationScenario, predictedBoundary, comparePlasticityRules, identicalKeyConflict } from './scenarios'
 import { seededRandom } from './random'
-import { runCapacityExperiment, timeExperiment, writeExperiment, tensorAccounting, capacityCurve } from './lab'
+import { runCapacityExperiment, timeExperiment, writeExperiment, tensorAccounting, capacityCurve, normalize } from './lab'
 import { latentSystem, faultControls, applyAction, identifiability, outputTrace, interventionSequences, type Fault } from '../latent/system'
 
 describe('final-push numerical contract',()=>{
@@ -64,6 +64,12 @@ describe('final-push numerical contract',()=>{
   })
   it('accounts for tensor shapes only',()=>{
     expect(tensorAccounting(6,4,8192,256,12,12,64,32768,2)).toEqual({state:100663296,kv:1207959552,crossover:8192/3})
+  })
+  it('counts a genuinely positive near-tie as strict class recall',()=>{
+    const result=capacityCurve([[1,0],normalize([1,4e-7])],2,1)
+    expect(1-result.maxCosine).toBeGreaterThan(0)
+    expect(1-result.maxCosine).toBeLessThan(1e-12)
+    expect(result.curve.at(-1)!.accuracy).toBe(1)
   })
 })
 describe('sealed teaching system',()=>{
