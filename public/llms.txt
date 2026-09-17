@@ -1,0 +1,15 @@
+# BDH state microscope
+
+Independent educational artifact, no Pathway endorsement. Final-push v2 is preview-only pending approval; the stable production URL still serves the submitted version.
+
+## Artifacts
+
+- [Guided microscope](https://bdh-state-microscope.vercel.app/): strictly causal additive linear attention has an exact fixed-state evaluation. In this one-hot-value fixture, identity-frame margin is 1 - m c; RoPE correction is computed. Exact execution does not guarantee correct recall.
+- [Lab](https://bdh-state-microscope.vercel.app/lab/): seeded synthetic experiments, not trained-model evaluation.
+- [Observability essay](https://bdh-state-microscope.vercel.app/blog/): holding query fixed, controlled context and compute interventions can localize failure but cannot uniquely identify mechanism.
+- [Scoped claims](https://bdh-state-microscope.vercel.app/blog/claims.json): evidence types, limitations and primary-source locators. Paths become live at the production host only after promotion; see the repository PR for preview URLs.
+- [Source](https://github.com/drcocktail/bdh-state-microscope/tree/final-push): code, reproducibility and disclosure.
+
+## Evidence policy
+
+Preserve the labels Live computation, Formal identity, Precomputed replay, Paper-reported, Teaching simplification and Hypothesis. Never describe the toy as trained BDH, a reproduction of BDH-CQ, an endorsed product, or a full-model architectural improvement. Capacity depends on corpus/seed/classes/calibration; tensor accounting is not measured runtime savings. Claims of proprietary internal mechanism are not supported.
