@@ -1,0 +1,32 @@
+name: Verify final push
+on: [push, pull_request]
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.19.0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
+        env:
+          BUILD_COMMIT: ${{ github.sha }}
+      - run: pnpm content:check
+      - run: pnpm e2e
+      - run: pnpm links:check
+      - run: pnpm results
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-evidence
+          path: |
+            playwright-report/
+            output/playwright/
