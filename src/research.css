@@ -2,20 +2,20 @@
 .citation > a { color: #5540ac; text-decoration: underline; text-underline-offset: 3px; }
 .citation [role=tooltip] { display: none; position: absolute; bottom: 130%; left: -8rem; width: min(22rem,75vw); padding: 1rem; background: white; color: #20241c; border: 1px solid #818575; box-shadow: 0 4px 12px #0002; z-index: 20; font-size: 13px; line-height: 1.6; }
 .citation:hover [role=tooltip],.citation:focus-within [role=tooltip] { display: block; }
-.references,.audience-strip,.lab-invitation { margin: 3rem 0; padding: 2rem; border: 1px solid #cbc9bd; }
+.references,.audience-strip,.lab-invitation { width: min(1320px,calc(100% - 48px)); box-sizing: border-box; margin: 3rem auto; padding: 2rem; border: 1px solid #cbc9bd; }
 .references h2 { font-size: clamp(1.5rem,4vw,2.2rem); }
 .references li { margin: 1rem 0; overflow-wrap: anywhere; }
 .references li span { display: block; color: #585c50; font-size: .85rem; margin-top: .3rem; }
-.artifact-footer { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr); gap: clamp(2rem,6vw,6rem); margin-top: 4rem; padding: clamp(3rem,6vw,5.5rem) max(24px,calc(50vw - 660px)) 1.8rem; background: var(--navy); font: 14px/1.7 Inter,ui-sans-serif,-apple-system,sans-serif; color: var(--panel); }
+.artifact-footer { width: auto; max-width: none; border-top: 0; align-items: start; display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1.6fr); gap: 3rem 5rem; margin: 4rem 0 0; padding: 5rem max(24px,calc((100% - 1320px) / 2)) 1.8rem; background: var(--navy); font: 14px/1.7 Inter,ui-sans-serif,-apple-system,sans-serif; color: var(--panel); }
 .footer-brand { display: inline-flex; align-items: center; gap: .8rem; font-weight: 850; font-size: .74rem; letter-spacing: .14em; text-transform: uppercase; text-decoration: none !important; }
 .footer-brand .brand-mark { border-color: var(--acid); }
 .footer-brand .brand-mark i { background: var(--acid); }
 .footer-statement { font: 500 clamp(1.8rem,3.2vw,2.9rem)/1.08 Georgia,"Times New Roman",serif; letter-spacing: -.04em; margin: 1.6rem 0 0; max-width: 16ch; color: var(--panel); }
-.artifact-footer nav { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 2rem; margin: 0; align-self: end; }
+.artifact-footer nav { display: grid; grid-template-columns: repeat(auto-fit,minmax(170px,1fr)); gap: 2rem; margin: 0; align-self: end; }
 .artifact-footer nav h2 { font: 820 .68rem Inter,ui-sans-serif,sans-serif; letter-spacing: .14em; text-transform: uppercase; color: var(--acid); margin: 0 0 .9rem; padding-bottom: .7rem; border-bottom: 1px solid #3c4a66; }
 .artifact-footer nav a { display: block; padding: .35rem 0; font-size: .88rem; text-decoration: none !important; color: #dce2eb; }
 .artifact-footer a:hover { color: var(--acid); }
-.footer-bottom { grid-column: 1/-1; border-top: 1px solid #3c4a66; display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding-top: 1.4rem; color: #aab4c6; font-size: .78rem; }
+.footer-bottom { grid-column: 1/-1; flex-wrap: wrap; border-top: 1px solid #3c4a66; display: flex; justify-content: space-between; align-items: center; gap: 2rem; padding-top: 1.4rem; color: #aab4c6; font-size: .78rem; }
 .footer-bottom p { margin: 0; max-width: 70ch; }
 .footer-domain { font: .8rem "SFMono-Regular",Consolas,monospace; color: var(--acid); text-decoration: none !important; }
 .footer-return { color: var(--acid); white-space: nowrap; text-decoration: none !important; }

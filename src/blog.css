@@ -62,14 +62,15 @@
 .control-cell:last-child { border-right: 0; }
 .control-value { position: absolute; right: 1.2rem; top: 1rem; font: 700 .85rem var(--mono); color: var(--acid); }
 .control-cell input[type=range] { width: 100%; accent-color: var(--acid); margin: .4rem 0 0; }
-.control-cell input[type=number],.control-cell select,.state-workspace select,.fault-instrument input,.fault-instrument select { width: 100%; min-height: 40px; padding: .45rem .6rem; background: #111b30; color: var(--panel); border: 1px solid #56657f; font: .85rem var(--mono); }
+.control-cell input[type=number],.control-cell select,.state-workspace select,.fault-instrument input,.fault-instrument select { width: 100%; min-height: 40px; padding: .45rem .6rem; background: #111b30; color: var(--panel); border: 1px solid #56657f; border-radius: 0; font: .85rem var(--mono); line-height: 1.3; -webkit-appearance: none; appearance: none; }
+.control-cell select,.state-workspace select,.fault-instrument select { padding-right: 2rem; background: #111b30 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%23d7f35f' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right .7rem center; text-overflow: ellipsis; }
 .control-cell--intro strong { font: 500 1.15rem var(--serif); letter-spacing: -.02em; }
 .control-cell--intro small { font-weight: 500; color: #aab4c6; line-height: 1.5; }
 .control-cell--intro .workspace-kicker { color: var(--acid); }
 .control-cell--toggle { flex-direction: row; align-items: center; gap: .7rem; font-size: .85rem; }
 .control-cell--toggle input { width: 20px; height: 20px; accent-color: var(--acid); flex-shrink: 0; }
 
-.blog-page button { padding: .8rem 1.1rem; min-height: 44px; background: var(--panel); border: 1px solid var(--line-dark); color: var(--ink); cursor: pointer; font: 750 .85rem var(--sans); transition: background .15s ease-out,color .15s ease-out,border-color .15s ease-out; }
+.blog-page button { padding: .75rem 1rem; min-height: 44px; height: auto; line-height: 1.3; white-space: normal; -webkit-appearance: none; appearance: none; border-radius: 0; background: var(--panel); border: 1px solid var(--line-dark); color: var(--ink); cursor: pointer; font: 750 .85rem var(--sans); transition: background .15s ease-out,color .15s ease-out,border-color .15s ease-out; }
 .blog-page button:hover:not(:disabled) { background: var(--acid); border-color: var(--acid); color: var(--ink); }
 .blog-page button:disabled { opacity: .45; cursor: not-allowed; }
 .blog-page button[aria-pressed=true] { background: var(--acid); color: var(--ink); border-color: var(--acid); }
@@ -155,12 +156,12 @@
 .workspace-records p,.workspace-records li { font: .75rem/1.8 var(--mono); overflow-wrap: anywhere; color: #c3cbd9; }
 
 /* Fault round: lime band with a navy instrument */
-.fault-round { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); gap: clamp(2rem,5vw,5rem); margin: 0 calc(50% - 50vw) 6rem; padding: clamp(3rem,7vw,7rem) max(24px,calc(50vw - 660px)); background: var(--acid); scroll-margin-top: 1rem; }
+.fault-round { display: grid; grid-template-columns: minmax(0,.85fr) minmax(0,1.15fr); gap: 4rem; margin: 0 0 6rem; padding: clamp(1.5rem,5%,4.5rem); background: var(--acid); scroll-margin-top: 1rem; }
 .fault-round .eyebrow { color: #465810; }
 .fault-copy > p { font-size: 1rem; line-height: 1.8; }
 .fault-round .scope-note { margin-top: 2rem; padding: 1.2rem 0 0; background: none; border: 0; border-top: 1px solid #849842; font-size: .85rem; line-height: 1.7; }
 .fault-instrument { background: var(--navy); color: var(--panel); padding: clamp(1.2rem,3vw,2.2rem); align-self: start; box-shadow: 0 30px 60px rgb(23 24 20 / .18); min-width: 0; }
-.round-setup { display: grid; grid-template-columns: .8fr .6fr 1.6fr; gap: .8rem; }
+.round-setup { display: grid; grid-template-columns: minmax(0,.7fr) minmax(0,.5fr) minmax(0,1.8fr); gap: .8rem; align-items: end; }
 .round-setup label { display: flex; flex-direction: column; gap: .4rem; font-size: .72rem; font-weight: 700; color: #c3cbd9; min-width: 0; }
 .fault-instrument .measurement { font: .8rem/1.6 var(--mono); color: #b9acff; margin: 1rem 0; padding: .8rem 1rem; border-left: 3px solid #7657e8; background: #111b30; }
 .round-output { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; border: 1px solid var(--navy-line); }
@@ -171,7 +172,7 @@
 .round-output .is-wrong strong { color: var(--coral); }
 .round-label { display: flex; justify-content: space-between; margin: 1.6rem 0 .7rem !important; color: var(--acid); }
 .round-label output { font-family: var(--mono); letter-spacing: 0; }
-.intervention-buttons { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .5rem; }
+.intervention-buttons { display: grid; grid-template-columns: repeat(auto-fit,minmax(150px,1fr)); gap: .5rem; align-items: stretch; }
 .blog-page .fault-instrument button { background: transparent; color: var(--panel); border-color: #56657f; text-align: left; }
 .blog-page .fault-instrument button:hover:not(:disabled),.blog-page .fault-instrument button[aria-pressed=true] { background: var(--acid); color: var(--ink); border-color: var(--acid); }
 .round-log { margin: .8rem 0 0; padding: 0; list-style: none; counter-reset: log; display: flex; flex-wrap: wrap; gap: .4rem; }
@@ -218,7 +219,7 @@
 .blog-provenance a { margin-right: 1.5rem; text-decoration: underline; }
 .print-url { display: none; }
 
-@media(max-width:1000px) { .specimen-controls,.specimen-controls--substrate { grid-template-columns: repeat(2,minmax(0,1fr)); } .control-cell { border-bottom: 1px solid var(--navy-line); } .fault-round { grid-template-columns: 1fr; } .state-view-grid { grid-template-columns: 1fr; } .synapse-magnifier { grid-template-columns: 1fr; gap: 1rem; } }
+@media(max-width:1000px) { .fault-round { gap: 2rem; } .specimen-controls,.specimen-controls--substrate { grid-template-columns: repeat(2,minmax(0,1fr)); } .control-cell { border-bottom: 1px solid var(--navy-line); } .fault-round { grid-template-columns: 1fr; } .state-view-grid { grid-template-columns: 1fr; } .synapse-magnifier { grid-template-columns: 1fr; gap: 1rem; } }
 @media(max-width:900px) { .essay-heading { grid-template-columns: 1fr; } .specimen-head { grid-template-columns: 1fr; gap: 0; } .specimen-verdict { text-align: left; margin-bottom: 1rem; } .specimen-output { grid-template-columns: repeat(2,minmax(0,1fr)); } .specimen-output > div:nth-child(2) { border-right: 0; } .specimen-output > div:nth-child(-n+2) { border-bottom: 1px solid var(--navy-line); } .reference-ledger { grid-template-columns: 1fr; } }
 @media(max-width:650px) { .blog-main { width: calc(100% - 32px); } .essay-heading h1 { font-size: 3.4rem; } .specimen { margin-left: -16px; margin-right: -16px; } .fault-tabs { grid-template-columns: 1fr; } .blog-page .fault-tabs button { border-right: 0; border-bottom: 1px solid var(--navy-line); } .specimen-output > div { padding: 1rem .8rem; } .specimen-controls { grid-template-columns: 1fr; } .specimen-controls--substrate { grid-template-columns: 1fr 1fr; } .specimen-controls--substrate .control-cell--intro { grid-column: 1/-1; } .control-cell { border-right: 0; } .workspace-heading,.view-heading { flex-direction: column; align-items: stretch; gap: .5rem; } .state-view-grid > section { padding: 1rem .8rem; } .raster-row { grid-template-columns: 1.6rem repeat(5,minmax(0,1fr)) 2.6rem; gap: .2rem; } .raster-group { gap: 1px; padding: 1px; } .neuron-field { grid-template-columns: repeat(12,minmax(0,1fr)); } .round-setup,.diagnosis-buttons { grid-template-columns: 1fr; } .round-output { grid-auto-flow: row; } .round-output > div { border-right: 0; border-bottom: 1px solid var(--navy-line); } .synapse-magnifier { padding: 1rem; } .blog-main table { font-size: .72rem; } .blog-main td,.blog-main th { padding: .4rem; } .blog-page .related-reading > summary { padding: 1rem; } .synthesis { padding: 0 1rem 1rem; } }
 @media print { @page { size: A4; margin: 18mm; } html,body { background: white !important; min-height: 0; } .blog-page { background: white; color: #171814; font-variant-ligatures: none; } .blog-page h1,.blog-page h2 { font-family: Georgia,serif; font-weight: 500; letter-spacing: -.02em; } .site-header,.skip-link,.specimen,.fault-round,.synthesis,.related-reading,.blog-provenance,.artifact-footer,.instrument-references,.essay-cover { display: none !important; } .blog-main { width: 100%; padding: 0; } .essay-heading { display: block; padding: 0; margin: 0 0 1.5rem; } .essay-heading h1 { font-size: 30px; line-height: 1.08; margin: 1rem 0; } .eyebrow { font-size: 8px; } .essay-heading .essay-claim { font: 13px/1.6 Georgia,serif; max-width: none; } .essay-meta { font-size: 10px; padding: 0; border: 0; margin: 1rem 0; } .essay-meta > a,.essay-meta > span:nth-child(2) { display: none; } .canonical-essay { max-width: none; margin: 0; padding: 0; border: 0; } .canonical-essay p { font-size: 10.5px; line-height: 1.75; orphans: 3; widows: 3; } .canonical-essay h2 { font-size: 15px; break-after: avoid; margin-top: 1.3rem; } .citation { font-size: 9px; } .citation [role=tooltip] { display: none; } .reference-ledger { display: block; border: 0; padding: 0; } .blog-references h2 { font-size: 15px !important; margin: 1.5rem 0 .5rem; } .blog-references li { font-size: 9px; } .print-url { display: block; font-size: 9px; margin-top: 1rem; } a,.blog-page .citation > a { color: #171814; } }
