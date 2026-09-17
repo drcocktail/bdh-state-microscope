@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { CONCEPTS, deterministicReview, observationOf, readTrace, sanitizeModelReview } from './tutor'
+import { CONCEPTS, deterministicReview, observationOf, readTrace, sanitizeModelReview, tidySentence } from './tutor'
 
 const trace = { overlap: 70, load: 5, scores: [1, 2.46, 1.64], margin: 1 - 2.46 }
 
@@ -107,5 +107,23 @@ describe('model output sanitising', () => {
       probe: { overlap: 50, load: 3, claim: 'Amber wins.' },
     }, explanation, fallback)
     expect(review?.concepts.map(c => c.id)).toEqual(CONCEPTS.map(c => c.id))
+  })
+})
+
+describe('sentence tidying', () => {
+  it('keeps a short sentence whole', () => {
+    expect(tidySentence('At 30% overlap with 4 writes, amber still wins.', 26)).toBe('At 30% overlap with 4 writes, amber still wins.')
+  })
+
+  it('never ends mid-clause', () => {
+    const long = 'Based on your explanation, the model will still retrieve the correct color because the contributions from each method remain identical, even when the keys are highly similar and the load grows.'
+    const tidy = tidySentence(long, 26)
+    expect(tidy.split(' ').length).toBeLessThanOrEqual(27)
+    expect(tidy).toMatch(/[.!?]$/)
+    expect(tidy).not.toMatch(/,\.$/)
+  })
+
+  it('takes only the first sentence and drops model dashes', () => {
+    expect(tidySentence('Amber wins here \u2014 clearly. Then something else happens.', 26)).toBe('Amber wins here, clearly.')
   })
 })

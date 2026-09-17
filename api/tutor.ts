@@ -71,6 +71,15 @@ export function deterministicReview(explanation: string, trace: Trace) {
 
 type ModelReview = ReturnType<typeof deterministicReview>
 
+/** Keep whole sentences: a line cut mid-clause reads like a broken page, not a short answer. */
+export function tidySentence(raw: string, maxWords: number): string {
+  const text = raw.replace(/\s*[\u2013\u2014]\s*/g, ', ').replace(/\s+/g, ' ').trim()
+  const first = text.match(/^[^.!?]*[.!?]/)?.[0]?.trim() ?? text
+  const words = first.split(' ')
+  if (words.length <= maxWords) return first
+  return words.slice(0, maxWords).join(' ').replace(/[,;:]+$/, '') + '.'
+}
+
 /** Trust nothing in the model's JSON: ids, quotes and probe ranges are all re-checked here. */
 export function sanitizeModelReview(raw: unknown, explanation: string, fallback: ModelReview, trace?: Trace): ModelReview | null {
   const value = raw as { concepts?: unknown; followUp?: unknown; probe?: unknown } | null
@@ -89,11 +98,11 @@ export function sanitizeModelReview(raw: unknown, explanation: string, fallback:
       note,
     }
   })
-  const followUp = typeof value.followUp === 'string' && value.followUp.trim() ? value.followUp.trim().slice(0, 240) : fallback.followUp
+  const followUp = typeof value.followUp === 'string' && value.followUp.trim() ? tidySentence(value.followUp, 32) : fallback.followUp
   const probeRaw = value.probe as Record<string, unknown> | undefined
   const overlap = Math.round(Number(probeRaw?.overlap) / 5) * 5
   const load = Math.round(Number(probeRaw?.load))
-  const claim = typeof probeRaw?.claim === 'string' ? probeRaw.claim.trim().slice(0, 140) : ''
+  const claim = typeof probeRaw?.claim === 'string' && probeRaw.claim.trim().length > 8 ? tidySentence(probeRaw.claim, 26) : ''
   // A probe identical to the trace on screen tests nothing, so fall back to one that moves.
   const sameAsTrace = trace ? overlap === trace.overlap && load === trace.load : false
   const probe = Number.isFinite(overlap) && overlap >= 0 && overlap <= 95 && Number.isInteger(load) && load >= 1 && load <= 7 && claim && !sameAsTrace
@@ -145,7 +154,7 @@ async function teachback(explanation: string, trace: Trace) {
           'Each quote must be copied verbatim from the reader when met is true, else empty. Each note is one sentence of feedback addressed to the reader.',
           'Each quote is at most 12 words: the shortest phrase from the reader that shows the concept, not their whole answer.',
           'followUp is one question that targets their weakest part.',
-          'probe is a NEW experiment, different from the trace shown: probe.overlap is a multiple of 5 from 0 to 95 and probe.load an integer 1 to 7, and it must differ from the trace. claim states, in one sentence addressed to the reader, what their explanation predicts will happen there.',
+          'probe is a NEW experiment, different from the trace shown: probe.overlap is a multiple of 5 from 0 to 95 and probe.load an integer 1 to 7, and it must differ from the trace. claim is ONE complete sentence of at most 22 words, addressed to the reader, stating what their explanation predicts will happen there.',
         ].join(' ') },
         { role: 'user', content: `Concepts:\n${CONCEPTS.map(c => `${c.id}: ${c.guidance}`).join('\n')}\n\nLive trace:\n${observation}\n\nReader's explanation:\n"""${explanation}"""` },
       ],
