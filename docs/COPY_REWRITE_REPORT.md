@@ -44,3 +44,13 @@ Source PR: https://github.com/drcocktail/bdh-state-microscope/pull/1
 CLI preview is the previously authorized deployment method. The submitted production deployment, main revision `e9691314cf3525e4e579a15c59ecf5267706567b`, annotated freeze tag and submitted PDF remain unchanged. V1 PDF SHA-256: `2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9`.
 
 The earlier review ZIP and its manifest are historical artifacts. A separately named copy-revision source ZIP is prepared after publication, with revision/checksum in an adjacent manifest. No training, API use, production promotion or submission-form edit is part of this copy revision.
+
+## Completed publication checks
+
+Runtime revision: `117ca2ecfec97912bc444877fe8aaeed7bfbf397`. Vercel CLI deployment `dpl_4fmzPpGQeGYkSBnJx6w3XPg2yJyb` is Ready and identified as a preview by `vercel inspect`. Immutable URL: https://bdh-state-microscope-6bndpgu05-drcocktails-projects.vercel.app/. The stable review alias was assigned to this deployment.
+
+All 15 browser tests passed against the public stable alias without authentication or a protection bypass. These include mobile/desktop layouts on all three routes, absence of evidence-category tags, offline computation, worker parity, fault identification and ambiguity, canonical source/PDF hashes, keyboard use and three accessibility scans. Sampled guided input-to-paint measurements were 17.5 to 33.4 ms on this run, not a universal performance guarantee.
+
+The complete local check passed again after the final print and methods changes: strict types, 41 unit/property tests, production build, 675-word content gate, frozen PDF hashes, exact generated-result replay, two-page PDF read-back and 15 browser tests. GitHub runtime verification passed for both [push](https://github.com/drcocktail/bdh-state-microscope/actions/runs/35244723625) and [PR](https://github.com/drcocktail/bdh-state-microscope/actions/runs/35244728223).
+
+Production still resolves to `dpl_CAZkAm2zsDidVY8VYuMBpuQt7p3v`; its anonymously downloaded v1 PDF still has the recorded `2ef8a487…` hash. Remote main and the dereferenced freeze tag remain at `e9691314cf3525e4e579a15c59ecf5267706567b`. The source PR remains open and unmerged. The subsequent publication-record commit changes this report only; it is not a different application runtime.
