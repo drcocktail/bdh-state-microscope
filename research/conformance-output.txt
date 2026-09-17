@@ -1,0 +1,5 @@
+(d) microscope RoPE (base 2^16) vs official rope : 8.88e-16
+(a) official vs fixed N x D recurrent state      : 8.88e-16
+(b) official vs paper co-rotating rho (Eq. 8)    : 2.66e-15
+(c) frame relation S_T^T = rho_T U^(-T)          : 2.40e-14
+
