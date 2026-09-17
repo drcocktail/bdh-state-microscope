@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test'
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import AxeBuilder from '@axe-core/playwright'
 
 for(const width of [390,1440])for(const route of ['/','/lab/','/blog/'])test(`layout and console ${route} ${width}px`,async({page})=>{
@@ -33,6 +34,7 @@ test('fixed-seed worker and time parity in every mode',async({page})=>{
 })
 test('sealed specimen, fault round and explicit ambiguity',async({page})=>{
   await page.goto('/blog/?roundSeed=17')
+  await expect(page.locator('#markdown-hash')).toHaveText(createHash('sha256').update(readFileSync('content/blog/reasoning-without-a-transcript.md')).digest('hex'))
   await expect(page.locator('.unsealed-mechanism')).toHaveCount(0)
   await page.getByRole('button',{name:'Unseal the mechanism'}).click();await expect(page.getByText('Decoded frontier by step')).toBeVisible()
   await page.getByRole('button',{name:'binding',exact:true}).click();await page.getByRole('button',{name:'Diagnose and unseal'}).click();await expect(page.getByText('Your diagnosis matches the planted construction.')).toBeVisible()
@@ -43,7 +45,7 @@ test('public routes, source hashes and content types',async({request})=>{
   for(const route of ['/lab','/lab/','/blog','/blog/'])expect((await request.get(route)).status()).toBe(200)
   expect((await request.get('/api/explain?overlap=10&load=2')).status()).toBe(404)
   const pdf=await request.get('/dataforge-latent-reasoning-blog.pdf');expect(pdf.status()).toBe(200);expect(pdf.headers()['content-type']).toContain('application/pdf');expect(createHash('sha256').update(await pdf.body()).digest('hex')).toBe('2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9')
-  const v2=await request.get('/blog/reasoning-without-a-transcript-v2.pdf');expect(v2.status()).toBe(200);expect(v2.headers()['content-type']).toContain('application/pdf');expect((await v2.body()).subarray(0,4).toString()).toBe('%PDF')
+  const v2=await request.get('/blog/reasoning-without-a-transcript-v2.pdf');expect(v2.status()).toBe(200);expect(v2.headers()['content-type']).toContain('application/pdf');expect((await v2.body()).subarray(0,4).toString()).toBe('%PDF');expect(createHash('sha256').update(await v2.body()).digest('hex')).toBe(createHash('sha256').update(readFileSync('public/blog/reasoning-without-a-transcript-v2.pdf')).digest('hex'))
   const claims=await request.get('/blog/claims.json');expect(claims.status()).toBe(200);expect(claims.headers()['content-type']).toContain('application/json');expect((await claims.json()).length).toBeGreaterThan(4)
   const llms=await request.get('/llms.txt');expect(llms.status()).toBe(200);expect(llms.headers()['content-type']).toContain('text/plain')
 })

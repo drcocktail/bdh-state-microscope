@@ -46,6 +46,7 @@ The original eight-page PS was independently checked against the attached brief 
 - All 14 primary source HEAD links returned HTTP 200 in this run. External failures warn in CI.
 - Bundle guard: no interpretation API fetch or model-provider string. Built JS roughly 291 kB total uncompressed across shared/page/worker assets; largest shared JS about 62.4 kB gzip. Vite emits per-asset gzip report.
 - Separate v2 PDF: 2 pages, A4, tagged, embedded Manrope Type 3 glyph programs; extracted text and rendered pages reviewed. Source and citations resolve to canonical Markdown. Print ligatures are disabled for clean text extraction. v1 generator/source retained as archive.
+- Current v2 PDF SHA-256 `65917836de6cd99382d61319df47d3a9b94131b05d0771229f81ce9879b745d0`. Its interactive link points to the verified public review deployment, not the frozen production host's future blog path.
 - v1 PDF verified both locally and by anonymous production download, unchanged SHA-256 `2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9`.
 - Canonical Markdown SHA-256 `7dac7a5cf5181f75ccbf131f12fb949d1b4345d3dbb1199df11efcb0f28f1fc6`.
 
@@ -72,9 +73,10 @@ Current candidate screenshots (not old v1 screenshots in the same ignored output
 - output/playwright/blog-reading-390.png and blog-reading-1440.png
 - output/playwright/blog-specimen-390.png and blog-specimen-1440.png
 - output/playwright/blog-v2-final-page2.png
+- output/playwright/synthesis-map-preview.png
 - public/blog/reasoning-without-a-transcript-v2.pdf
 
-Screenshots are local generated evidence and are also uploaded by CI. Full-page and targeted reading/specimen renders were reviewed. The PDF skill drove separate-v2 rendering/readback; Playwright drove keyboard, layout, offline, accessibility and correctness checks.
+Suite full-page screenshots are generated locally and uploaded by CI. Targeted/manual screenshots and PDF page renders are local evidence. Full-page, targeted reading/specimen, synthesis and PDF renders were reviewed. The PDF skill drove separate-v2 rendering/readback; Playwright drove keyboard, layout, offline, accessibility and correctness checks.
 
 ## Source and deployment status
 
@@ -86,7 +88,9 @@ Git deployment failed: the Vercel project has `link: null`; the CLI Git connect 
 
 Unmerged PR: https://github.com/drcocktail/bdh-state-microscope/pull/1
 
-Hosted verification passed at implementation revision `8cddd79f58832c075dd903f1c05a3fbef25f373d`: https://github.com/drcocktail/bdh-state-microscope/actions/runs/35238844620. Frozen install, typecheck, 40 tests, all three-entry build, content checks, 15 browser checks, links, generated results and browser evidence upload passed. A subsequent discrete-URL-control guard is locally verified and will be rechecked in CI. Local route checks are not represented as Vercel preview checks.
+Hosted verification passed at implementation revision `8cddd79f58832c075dd903f1c05a3fbef25f373d`: https://github.com/drcocktail/bdh-state-microscope/actions/runs/35238844620. The discrete-URL-control guard also passed on revision `c54fa6f3f8b842120e0129d88c33b59c007a2cf4`: https://github.com/drcocktail/bdh-state-microscope/actions/runs/35239137364. Frozen install, typecheck, 40 tests, all three-entry build, content checks, 15 browser checks, links, generated results and browser evidence upload passed.
+
+Initial CLI preview: https://bdh-state-microscope-al9ngfazj-drcocktails-projects.vercel.app/ at `c54fa6f3f8b842120e0129d88c33b59c007a2cf4`, deployment `dpl_ERHr3e5gho8WgsdR2nTTR3XQJ54U`, ready with `target: null` (preview). All 15 browser tests passed against this URL using fresh unauthenticated contexts. No Vercel token, protection bypass or stored browser session was supplied. Input-to-two-frame-paint measured 23.5 to 34.2 ms. JSON/PDF/text content types and immutable hashed-asset caching were checked. Both PDF hashes matched their local versions at that time. The Markdown hash and build commit were read from the hosted blog. A last correction makes the PDF link point to this real review URL; the final build is rechecked below.
 
 ## Skipped stretch items and open risks
 

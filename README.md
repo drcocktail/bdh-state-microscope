@@ -67,7 +67,7 @@ To generate the separate PDF:
 pnpm build
 pnpm preview --host 127.0.0.1 --port 4173
 # In another terminal:
-pnpm pdf:v2
+BLOG_PUBLIC_URL=https://bdh-state-microscope-al9ngfazj-drcocktails-projects.vercel.app pnpm pdf:v2
 pnpm build
 ```
 
