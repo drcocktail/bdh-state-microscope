@@ -94,11 +94,24 @@ Hosted verification passed at implementation revision `8cddd79f58832c075dd903f1c
 
 Initial CLI preview: https://bdh-state-microscope-al9ngfazj-drcocktails-projects.vercel.app/ at `c54fa6f3f8b842120e0129d88c33b59c007a2cf4`, deployment `dpl_ERHr3e5gho8WgsdR2nTTR3XQJ54U`, ready with `target: null` (preview). All 15 browser tests passed against this URL using fresh unauthenticated contexts. No Vercel token, protection bypass or stored browser session was supplied. Input-to-two-frame-paint measured 23.5 to 34.2 ms. JSON/PDF/text content types and immutable hashed-asset caching were checked. Both PDF hashes matched their local versions at that time. The Markdown hash and build commit were read from the hosted blog. A last correction makes the PDF link point to this real review URL; the final build is rechecked below.
 
+### Final verified review candidate
+
+- Stable preview: https://bdh-state-microscope-review-drcocktails-projects.vercel.app/
+- Immutable deployment: https://bdh-state-microscope-kwdgp0rxi-drcocktails-projects.vercel.app/
+- Runtime/source revision: `8071ac5753e859795f133e87b85dd58cfc721a1a`.
+- Deployment: `dpl_6NzAdAWPa8fqmingTt5iZbFWYRac`, ready, preview target (`null`); stable review alias resolves to this deployment.
+- Hosted CI, including all five review remediations, 41 tests, 15 browser tests, replay equality and canonical PDF read-back: https://github.com/drcocktail/bdh-state-microscope/actions/runs/35240476411, success. The paired push run also passed.
+- Final anonymous stable-preview suite: 15/15 passed, no authentication/bypass. Includes control-bound regressions, canonical Markdown hash, exact v1 and v2 PDF download hashes, API 404, all routes, offline computation and accessibility/layout. Two-frame guided input-to-paint was 22.8 to 33.4 ms; full suite 30.1 seconds including network navigation.
+- Hosted Markdown hash and build revision match the recorded source. Hosted v2 PDF hash is `92816df749edeaf7e954218d0e5576e1c306358141a7bd03b2ecebb1a73abc1a`.
+- Production remains deployment `dpl_CAZkAm2zsDidVY8VYuMBpuQt7p3v` at submitted revision `e9691314cf3525e4e579a15c59ecf5267706567b`; anonymous v1 PDF download still matches the frozen hash. `main` and the unmerged PR state were checked.
+
+This final handoff report is a post-deployment documentation-only change. The deployed runtime revision remains explicit above; no later app, engine, dependency, config, canonical essay or PDF changes are mixed into its evidence. Latest source checks are visible on the unmerged PR. A review ZIP is generated from the final branch revision into `output/submission/bdh-state-microscope-v2-review.zip`; its revision and checksum are in the adjacent `REVIEW_PACKAGE.md`, outside the archive to avoid a self-referential checksum.
+
 ## Skipped stretch items and open risks
 
 P2 training disabled. Tokens-versus-information, N×N synapse chapter, full BDH checkpoint, optimized WY kernel, presentation mode, embed and backup video are deferred, not exposed as placeholders. No paid API or GPU task was started.
 
-Still required for deployment completion: CLI preview deployment, anonymous preview suite and confirmed green CI on the final review revision. No submission form was edited. External learner efficacy and full-model improvement are untested. Browser metrics vary by machine. Capacity caps may censor results. Finite diagnostics cannot rule out arbitrary or interacting mechanisms.
+The implementation, hosted verification and anonymous preview gates are complete. No submission form was edited. Human review and organizer permission still precede any production/submission mutation. External learner efficacy and full-model improvement are untested. Browser metrics vary by machine. Capacity caps may censor results. Finite diagnostics cannot rule out arbitrary or interacting mechanisms. Existing v4 action wrappers emitted Node-20 deprecation annotations while running successfully under Node24; action-major modernization is a maintenance item, not an untested change in this candidate.
 
 ## Manual actions
 
