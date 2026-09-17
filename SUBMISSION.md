@@ -2,7 +2,7 @@
 
 ## Freeze
 
-This is a v2 candidate, not a replacement submission. The adopted switches prohibit production promotion and replacing the submitted blog PDF. Production and `main` remain the submitted v1 revision. An unmerged `final-push` PR and preview are the review deliverables. Organizer permission to edit after the deadline is not established by the PS.
+Version 2 is published at https://bdh-state-microscope.vercel.app/ with the user's authorization of 17 September 2026. `main` and tag `v1-submission` keep the submitted revision, and the submitted v1 PDF is still served byte-identical at `/dataforge-latent-reasoning-blog.pdf`. Organizer permission to edit after the deadline is not established by the PS.
 
 ## Form-ready content if changes are authorized
 
@@ -13,10 +13,10 @@ Audience: ML engineers/students who know dot products, matrix products and causa
 Objectives: derive recurrence, predict interference, explain BDH's large neuron space, distinguish revision from missing information.
 Distinct blog: PS topic 9, observability constraints in latent reasoning systems; 675 body words, at least two recent primary papers, explicit limitation and own judgment. The user authorized the prose revision on 17 September 2026; the revised preview and separate v2 PDF do not alter the submitted v1 archive.
 
-Production v1 artifact: https://bdh-state-microscope.vercel.app/
+Production artifact (v2): https://bdh-state-microscope.vercel.app/
 Public source: https://github.com/drcocktail/bdh-state-microscope
 Submitted v1 PDF: https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf
-New candidate paths on the verified preview: `/`, `/lab/`, `/blog/`, `/blog/reasoning-without-a-transcript-v2.pdf`. Preview/PR URLs are in `docs/FINAL_PUSH_REPORT.md`.
+Published paths: `/`, `/lab/`, `/blog/`, `/blog/reasoning-without-a-transcript-v2.pdf`.
 
 ## Demonstration route
 

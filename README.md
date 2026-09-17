@@ -86,7 +86,7 @@ Key limits: random lift thresholds are calibrated on their own corpus; capacity 
 
 ## Freeze and deployment
 
-`main` and production are preserved at the submitted revision `e9691314cf3525e4e579a15c59ecf5267706567b`, with annotated tag `v1-submission`. All new work is on `final-push`, preview-only and unmerged. Do not interpret the production host's current v1 pages as v2. See [final report](docs/FINAL_PUSH_REPORT.md) for the verified preview and PR.
+`main` is preserved at the submitted revision `e9691314cf3525e4e579a15c59ecf5267706567b`, with annotated tag `v1-submission`. On 17 September 2026 the user authorized publishing version 2 from `final-push` to the submitted domain: https://bdh-state-microscope.vercel.app/ now serves the microscope, the essay (`/blog/`) and the lab (`/lab/`) from deployment `bdh-state-microscope-mt7dx5olg-drcocktails-projects.vercel.app`. The submitted v1 PDF is still served byte-identical.
 
 Submitted v1 PDF SHA-256:
 
