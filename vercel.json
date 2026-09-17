@@ -1,0 +1,14 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": null,
+  "buildCommand": "pnpm build",
+  "installCommand": "pnpm install --frozen-lockfile",
+  "outputDirectory": "dist",
+  "cleanUrls": true,
+  "headers": [
+    { "source": "/assets/:path*", "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }] },
+    { "source": "/blog/:file*.json", "headers": [{ "key": "Content-Type", "value": "application/json; charset=utf-8" }] },
+    { "source": "/blog/:file*.pdf", "headers": [{ "key": "Content-Type", "value": "application/pdf" }] },
+    { "source": "/llms.txt", "headers": [{ "key": "Content-Type", "value": "text/plain; charset=utf-8" }] }
+  ]
+}

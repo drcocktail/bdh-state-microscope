@@ -1,5 +1,7 @@
 # BDH State Microscope — Implementation Plan
 
+> Archived v1 implementation plan. The current final-push execution spine and deviations are in FINAL_PUSH_SCOPE_AUDIT.md and FINAL_PUSH_REPORT.md.
+
 ## The product claim
 
 The microscope demonstrates one exact fact and one bounded research question:

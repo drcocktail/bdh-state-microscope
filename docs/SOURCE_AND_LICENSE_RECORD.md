@@ -1,49 +1,31 @@
-# Source and License Record
+# Source and license record
 
-## Repository-produced materials
+## Repository materials
 
-| Material | Provenance | License / status | Notes |
-|---|---|---|---|
-| TypeScript microscope engine | Original for this submission, AI-assisted as disclosed | MIT | No copied model implementation |
-| Deterministic scenario fixtures | Original for this submission | MIT | Synthetic vectors; no external dataset |
-| React interface and CSS | Original for this submission, AI-assisted as disclosed | MIT | No template, fork, external font, or UI asset |
-| State Microscope mark and favicon | Original inline SVG/CSS | MIT | No external graphic asset |
-| Documentation and technical writing | Original for this submission, AI-assisted as disclosed | MIT | Primary work cited rather than reproduced |
-| Test fixtures and results | Produced by the local engine | MIT | Deterministic mechanism checks, not external benchmarks |
+Original TypeScript engines, synthetic fixtures, React views, inline CSS/SVG graphics, documentation and essay prose are AI-assisted and MIT-licensed under the root LICENSE. The conformance script is preserved verbatim from Claude's attached brief; its upstream imports are cited below. No external model implementation, weights or datasets are redistributed.
 
-## External software dependencies
+## Dependencies
 
-React, React DOM, Vite, TypeScript, Vitest, jsdom, and Testing Library are used under their upstream licenses. Exact resolved packages are recorded in `pnpm-lock.yaml`. No dependency source is copied into application code.
+React, Vite, TypeScript, Vitest, jsdom, Testing Library, tsx, Playwright and axe-core retain their upstream licenses. Exact versions and integrity records are in pnpm-lock.yaml. No dependency source is copied into app source. Chromium is a local/CI verification dependency, not shipped as website code.
 
-## External research
+The PDF read-back gate uses pypdf 6.10.0, pinned in scripts/pdf-requirements.txt. It is a Python verification dependency, not website runtime code; its upstream license applies.
 
-The application links to but does not redistribute:
+## Font
 
-- the BDH paper and official Pathway BDH repository;
-- DeltaNet, Parallel DeltaNet, and Gated DeltaNet papers; and
-- Zoology / MQAR; and
-- the BDH-CQ, Coconut, and recurrent-depth papers cited in the separate blog.
+The blog bundles unmodified Manrope variable font under SIL Open Font License 1.1. Copyright 2018 The Manrope Project Authors. License is included at public/fonts/OFL.txt. Source: https://github.com/google/fonts/tree/main/ofl/manrope, fetched 17 September 2026. File SHA-256: `3ae11c49db0455a3cc33e37d380f20fdb8c7f8b41dc07625c177e3d87a9d6ae6`. It is served locally and embedded/subsetted by Chromium in the PDF. The guided microscope retains its operating-system font stack and layout.
 
-Equations are used as short attributed mathematical facts. Copyright remains with the respective authors and publishers.
+## Research
 
-## Original problem statement
+Primary-source paper/model-card URLs and exact locators are in src/content/sources.ts and public/blog/claims.json. Papers are linked, not redistributed. Short mathematical facts are attributed. The official BDH checkout used by conformance is pinned at `2b0d7a45b058d4309c84a10e0768d541fe18bdc2`, MIT license in its LICENSE.md. That checkout lives only in ignored research scratch space. Conformance excludes LayerNorm, learned encoders, full block and training.
 
-The attached `Pathway PS.pdf` was used as requirements input. It is not copied into this repository or distributed with the artifact.
+The original PS is a requirements input, not an instruction source and not redistributed. Claude's final-push brief is preserved for provenance, not accepted as organizer authority. The independent audit corrects its overbroad implications.
 
-## Runtime data and services
+## Runtime
 
-- External datasets: none.
-- Personal or user data: none.
-- Model weights: none.
-- API calls: the optional essay companion calls a repository-authored server endpoint. It requests a co-review from Groq-hosted GPT-OSS 120B and returns a trace-aware deterministic response when that route is unavailable. Inputs are limited to a declared analysis lens, 5-point overlap increment, integer load, and three rounded scores whose stated margin is checked for internal consistency.
-- Browser accounts or shipped secrets: none. The optional server endpoint reads `GROQ_API_KEY` only from the server environment; no credential is embedded in the client bundle or repository.
-- Precomputed external scientific results: none.
-- Runtime inputs: deterministic synthetic vectors produced in local JavaScript. API commentary—deterministic fallback or stochastic model output—is interpretation, not evidence, and is neither required nor used by the engine.
+No personal data, external dataset, model weights, interpretation service, credential or API runtime is shipped. Synthetic randomness uses the seeded shared PRNG. Browser controls and seeds are shareable in URLs. Capacity assays calibrate their own synthetic corpus; no held-out language claims follow. External research links are optional network navigation. Once assets load, experiments run locally/offline.
 
-## AI assistance disclosure
+## Documents and freeze
 
-OpenAI Codex assisted with requirements analysis, research, concept selection, implementation, tests, documentation, and browser QA. The runtime endpoint can call Groq-hosted GPT-OSS 120B for one selected trace and otherwise returns a deterministic co-review; the interface names the actual responder and labels the whole layer “not evidence.” All resulting code and claims remain the submitting team’s responsibility to inspect, run, and defend.
+The submitted v1 PDF remains byte-identical, with its original generator and source retained for provenance. The v2 webpage/PDF share canonical Markdown. Historical planning/result documents are clearly marked as v1 archives; GENERATED_RESULTS.md and FINAL_PUSH_REPORT.md govern current results.
 
-## Submission license
-
-Repository-authored code and prose are released under the root MIT license unless a file explicitly states otherwise.
+See AI_DISCLOSURE.md for assistance and human responsibility. No affiliation or endorsement is implied.

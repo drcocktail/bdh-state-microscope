@@ -1,5 +1,7 @@
 # Experiment Results and Architectural Handoff
 
+> Archived v1 handoff, retained for provenance. GENERATED_RESULTS.md, ENGINE_API.md and FINAL_PUSH_REPORT.md supersede its current-results status.
+
 ## Executive result
 
 The local experiments establish three things:

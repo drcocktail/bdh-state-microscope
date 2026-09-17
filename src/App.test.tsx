@@ -8,7 +8,7 @@ describe('BDH State Microscope learning journey', () => {
     const user = userEvent.setup()
     render(<App />)
 
-    expect(screen.getByText('PARITY PASS')).toBeInTheDocument()
+    expect(screen.getByText('Parity pass')).toBeInTheDocument()
     expect(screen.getByText('recall breaks')).toBeInTheDocument()
     await user.click(screen.getByRole('button', { name: /Separated/ }))
     expect(screen.getByText('recall holds')).toBeInTheDocument()
@@ -41,9 +41,9 @@ describe('BDH State Microscope learning journey', () => {
     )
     expect(compare).toBeEnabled()
     await user.click(compare)
-    expect(screen.getByText('Mechanism captured.')).toBeInTheDocument()
+    expect(screen.getByText('You connected all three parts.')).toBeInTheDocument()
     expect(screen.getByText('3/3 concepts captured')).toBeInTheDocument()
-    expect(screen.getAllByText('Captured')).toHaveLength(3)
+    expect(screen.getAllByText('Mentioned')).toHaveLength(3)
   })
 
   it('turns a short weak teach-back attempt into actionable feedback', async () => {
@@ -56,8 +56,8 @@ describe('BDH State Microscope learning journey', () => {
     expect(compare).toBeEnabled()
     await user.click(compare)
     expect(screen.getByText('0/3 concepts captured')).toBeInTheDocument()
-    expect(screen.getByText(/Try this scaffold/)).toBeInTheDocument()
-    expect(screen.getAllByText('Missing')).toHaveLength(3)
+    expect(screen.getByText(/A place to start/)).toBeInTheDocument()
+    expect(screen.getAllByText('Check this')).toHaveLength(3)
   })
 
   it('lets the reader inspect a pre-write token state', async () => {
@@ -65,18 +65,14 @@ describe('BDH State Microscope learning journey', () => {
     render(<App />)
 
     await user.click(screen.getByRole('button', { name: 'Inspect A → amber' }))
-    expect(screen.getByText(/1\/7 · A → amber/)).toBeInTheDocument()
+    expect(screen.getByText(/1\/7 ; A → amber/)).toBeInTheDocument()
     expect(screen.getByText('[0, 0, 0]')).toBeInTheDocument()
   })
 
-  it('keeps the optional Groq layer separate from deterministic evidence', () => {
+  it('exposes separate offline lab and blog entries', () => {
     render(<App />)
-
-    expect(screen.getByText('MODEL COMMENTARY · NOT EVIDENCE')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Interrogate this result' })).toBeInTheDocument()
-    expect(screen.getByRole('link', { name: /Open the required 600–800-word blog PDF/ })).toHaveAttribute(
-      'href',
-      '/dataforge-latent-reasoning-blog.pdf',
-    )
+    expect(screen.queryByRole('button', { name: 'Interrogate this result' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Open the lab' })).toHaveAttribute('href', '/lab/')
+    expect(screen.getAllByRole('link', { name: 'Submitted blog v1 PDF' })[0]).toHaveAttribute('href', '/dataforge-latent-reasoning-blog.pdf')
   })
 })

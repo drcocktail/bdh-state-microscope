@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pathway research copywriting"
+  short_description: "Explain architectures through concrete computations"
+  default_prompt: "Use $pathway-research-copywriting to rewrite this technical explanation so a reader can follow the computation without losing its assumptions or sources."

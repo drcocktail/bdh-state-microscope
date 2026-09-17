@@ -1,31 +1,43 @@
 {
   "name": "bdh-state-microscope",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
+  "packageManager": "pnpm@11.19.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "npm run test && npm run build"
+    "typecheck": "tsc -b",
+    "results": "tsx scripts/report_results.ts",
+    "results:check": "tsx scripts/report_results.ts --check",
+    "content:check": "tsx scripts/content-check.ts",
+    "links:check": "tsx scripts/link-check.ts",
+    "pdf:v2": "tsx scripts/build_blog_pdf.ts",
+    "pdf:check": "tsx scripts/check_blog_pdf.ts",
+    "e2e": "playwright test",
+    "check": "pnpm typecheck && pnpm test && pnpm build && pnpm content:check && pnpm results:check && pnpm pdf:check && pnpm e2e"
   },
   "dependencies": {
-    "react": "latest",
-    "react-dom": "latest"
+    "react": "19.2.8",
+    "react-dom": "19.2.8"
   },
   "devDependencies": {
-    "@testing-library/jest-dom": "latest",
-    "@testing-library/react": "latest",
-    "@testing-library/user-event": "latest",
-    "@types/node": "^26.5.0",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@vitejs/plugin-react": "latest",
-    "jsdom": "latest",
-    "typescript": "latest",
-    "vite": "latest",
-    "vitest": "latest"
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.63.0",
+    "@testing-library/jest-dom": "7.0.1",
+    "@testing-library/react": "16.3.3",
+    "@testing-library/user-event": "14.6.7",
+    "@types/node": "26.5.0",
+    "@types/react": "19.2.18",
+    "@types/react-dom": "19.2.7",
+    "@vitejs/plugin-react": "6.1.1",
+    "jsdom": "30.0.1",
+    "tsx": "4.23.13",
+    "typescript": "7.0.2",
+    "vite": "8.2.2",
+    "vitest": "5.0.0"
   }
 }

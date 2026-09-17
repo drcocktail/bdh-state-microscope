@@ -1,55 +1,19 @@
-# Requirements Traceability
+# Requirements traceability, independently verified
 
-This table maps the Pathway problem-statement signals to the BDH State Microscope. The problem statement remains an input document; it is not copied into the submission.
+Source: original Pathway PS, all eight pages. Attached brief preferences are not organizer requirements.
 
-| Problem-statement requirement or judging signal | Microscope implementation | Verification |
+| PS requirement | Current candidate | Evidence |
 |---|---|---|
-| Interactive explorable artifact | Presets, step selector, overlap/load controls, sweep-load controls, prediction test, teach-back | Browser QA and interaction tests |
-| Concept taught through manipulation | Causal matrix, recurrent state, exact parity, controlled overlap collision | `StateMicroscope` plus engine tests |
-| Real concept variables | Key overlap, association load, causal step, chunk schedule | Native controls bound to engine inputs |
-| Immediate visible consequence | Matrices, output bars, target margin, parity errors, boundary plot | No network or prerecorded trace |
-| Ground truth versus estimate | Declared one-hot target beside computed output and argmax | Collision/separated tests |
-| Visible internal state | Complete selected `8 × 3` pre-write state and rotated key/value | Accessible matrix/vector labels |
-| Sequential state change | Token selector walks every `S_(t-1)` and output before write | Recurrent trace records |
-| Explain the BDH mechanism | Equation 8 mapping and official strict-causal implementation link | BDH bridge and evidence ledger |
-| Go beyond surface description | Independent parallel, recurrent, and chunk evaluators prove equivalence | `microscope.ts` and parity suite |
-| Investigate architecture | Additive versus normalized delta write with `U=I` | Plasticity lab and unit test |
-| Preserve limitations | Identical-key negative control and trained-model disclaimer | UI, ledger, defense |
-| Fast feedback | Small deterministic matrix operations in-browser | Interaction is immediate |
-| No login/API dependency | Static React artifact, local synthetic fixtures | Clean run without environment variables |
-| Source transparency | Primary links, source/license record, AI disclosure | README and docs |
-| Separate 600–800 word technical blog | Topic 9 essay on observability constraints in latent reasoning | `docs/BLOG.md` and generated PDF |
-| Optional deeper interaction without confusing evidence | API co-review of a bounded, engine-derived trace through Groq-hosted GPT-OSS 120B | Server-only endpoint with deterministic fallback; layer labelled “model commentary, not evidence,” actual responder named |
+| One approved concept and falsifiable claim | Fixed-state causal linear attention, exact execution versus fixture recall | Guided derivation, margin formula and independently evaluated output |
+| One coherent learner journey | Identity, state inspection, collision, boundary prediction, revision, negative control, teach-back | Browser and component tests |
+| Real controllable substrate, immediate consequences | Keys/load/base/causal step/beta and key relation | Live engine, input-to-paint test |
+| Truth beside actual and visible state | One-hot target, bars/margin, causal scores, pre-write state | Numeric accessible labels; independently evaluated routes |
+| BDH module with substantive sources | Frame relation, neuron space, time operator, CQ limits | Eq.8, Claim7/8, Definition4, pinned public code; CPU conformance |
+| Recent primary literature | BDH, delta/gated/Kimi/regression/Zoology | Inline markers, exact locators, references, scoped claims |
+| Public sign-in-free source/artifact and README | Existing public repo and submitted production; new preview tested separately | Report includes anonymous route checks; no merge/promotion |
+| Reproducibility, provenance/license and AI disclosure | Exact pins, generated tables, conformance, shared seed, MIT/OFL records | Content/hash checks, docs, CI |
+| Separate 600 to 800 word blog, different topic | Topic9 observability, canonical v2 essay | 675 body words excluding headings/markers/refs; at least two recent primary papers |
+| Blog limitations and evidence versus own judgment | Limitations section and a concluding recommendation distinct from the cited findings | Unrepaired ordering cases, restricted ambiguous round, detailed source records |
+| Blog PDF | Frozen v1 plus separate tagged v2 | Source hash; rendered readback; v1 SHA invariant |
 
-## Judging-dimension coverage
-
-| Dimension | Evidence in this repository |
-|---|---|
-| Technical accuracy | Algebra, independent evaluators, 35-scenario parity grid, strict-causal and chunk tests |
-| Technical depth | Visible state transition, chunk carry, RoPE path, bounded delta intervention |
-| Interactivity | Four control families, step inspection, challenge, teach-back |
-| Pedagogy | One reasoning order: equivalence → compression → collision → intervention → negative control |
-| Originality | A state microscope that proves the schedule equivalence before investigating failure |
-| Evidence discipline | Five explicit evidence classes and claim-by-claim falsifiers |
-| Usability | Desktop/mobile reflow, semantic controls, accessible numeric alternatives |
-| BDH relevance | Direct equation and official-code bridge; no generic AI detour |
-
-## Current mechanical verification
-
-- `pnpm test`: 19 tests across engine, legacy prototype, and interface at the time of this record.
-- `pnpm build`: strict TypeScript and Vite production build pass.
-- Browser: desktop and 390px checked; no console warnings/errors and no document horizontal overflow.
-- Default collision: live parity pass while recall fails.
-- Separated preset: live recall recovery.
-
-The exact test count is descriptive, not load-bearing; `pnpm check` is the source of truth.
-
-## External submission requirements
-
-| Requirement | Repository status | Team action |
-|---|---|---|
-| Public working artifact URL | Complete and anonymously HTTP-checked | `https://bdh-state-microscope.vercel.app` |
-| Public source repository URL | Complete and public | `https://github.com/drcocktail/bdh-state-microscope` |
-| Blog PDF URL | Complete; downloaded hash matches versioned PDF | `https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf` |
-| Submission metadata | Not owned by code | Enter team/member details in the official form |
-| Deadline/rules | Time-sensitive external fact | Re-check the official event page immediately before submission |
+The no-runtime-LLM rule, worker/performance budget, copy style and preview freeze are adopted brief constraints, not PS prescriptions. An eight-plus-four presentation format was not found in the PS. No post-deadline editing permission is inferred. Tests verify behavior, not educational efficacy in an external learner study or hackathon acceptance.

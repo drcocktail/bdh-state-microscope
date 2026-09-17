@@ -1,5 +1,7 @@
 # BDH State Microscope — Evidence Ledger
 
+> Archived v1 record, retained for provenance. Current candidate claims, results and verification are in public/blog/claims.json, GENERATED_RESULTS.md and FINAL_PUSH_REPORT.md. No historical API or numeric claim below describes current v2 runtime.
+
 This ledger separates algebra, locally executed results, paper-supported context, and hypotheses. “The interface displays it” is not treated as evidence unless the value is returned by the shared engine and covered by a verification gate.
 
 ## Claim-to-evidence map

@@ -1,5 +1,7 @@
 # Reasoning Without a Transcript Is Not Reasoning Without Evidence
 
+> Frozen v1 essay source and PDF provenance. The current candidate essay is content/blog/reasoning-without-a-transcript.md and its separate v2 PDF. This archived source is not rewritten.
+
 **Blog topic 9: Observability Constraints in Latent Reasoning Systems**
 
 **Central claim:** A latent-reasoning system is observable enough to test when controlled interventions cause preregistered, exact changes in behavior, even if its intermediate states are never decoded.

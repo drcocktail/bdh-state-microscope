@@ -1,0 +1,462 @@
+[
+  {
+    "id": "guided-identity",
+    "text": "A fixed N × D additive state reproduces strictly causal dot-product attention.",
+    "scope": "Read before write, zero initial state; query-only tokens have effective zero values.",
+    "evidence_type": "Formal identity",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Eq. 8"
+      },
+      {
+        "id": "code",
+        "locator": "Attention.forward"
+      }
+    ],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "fixture-boundary",
+    "text": "The identity-frame fixture margin is 1 - m c, with strict recall only above zero.",
+    "scope": "One-hot values, private orthogonal distractor directions, m largest wrong-value multiplicity; not general keys.",
+    "evidence_type": "Formal identity",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "rope-correction",
+    "text": "RoPE changes the fixture margin; the correction is measured beside the identity-frame formula.",
+    "scope": "N=8, target coordinate 6, bases 65536 or 10000; no fixed correction guarantee for arbitrary positions.",
+    "evidence_type": "Live computation",
+    "sources": [
+      {
+        "id": "code",
+        "locator": "get_freqs and rope"
+      }
+    ],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "same-key-delta",
+    "text": "The two-write unit-key delta read is β(1-β) amber + β violet.",
+    "scope": "Identity rotation, zero prior, same unit key, same β for both writes, epsilon zero.",
+    "evidence_type": "Formal identity",
+    "sources": [
+      {
+        "id": "delta",
+        "locator": "Section 2.2"
+      }
+    ],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "orthogonal-delta",
+    "text": "On orthogonal unit keys the delta write equals a β-scaled additive write.",
+    "scope": "No prediction along the new key; not arbitrary correlated keys.",
+    "evidence_type": "Formal identity",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "conflict",
+    "text": "The common read minimizing total MSE for two incompatible one-hot targets is their midpoint, with MSE 1/6 to each.",
+    "scope": "Three value channels, equal weighting; deterministic same-key read.",
+    "evidence_type": "Formal identity",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "official-config",
+    "text": "Public BDH defaults imply 8192 neurons per head, 256 value channels, 4 heads and 6 layers.",
+    "scope": "Pinned public source, not BDH-CQ dimensions; not measured recurrent memory.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "code",
+        "locator": "BDHConfig; BDH.forward"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "official-rope",
+    "text": "Public attention uses identical ReLU keys and queries before RoPE, base 2^16, strict causal masking and additive products.",
+    "scope": "ReLU positivity is before RoPE; no delta rule or damping in this public attention function.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "code",
+        "locator": "get_freqs; Attention.forward; BDH.forward"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "frame",
+    "text": "Absolute-key and co-rotating states obey S_T^T = rho_T U^(-T).",
+    "scope": "Attention-product conformance only, excludes LayerNorm and full-block/training equivalence.",
+    "evidence_type": "Precomputed replay",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Eq. 8"
+      },
+      {
+        "id": "code",
+        "locator": "Attention.forward"
+      }
+    ],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "capacity-theorem",
+    "text": "Claim 7 describes order-n distinguishable facts under weak-correlation assumptions, order-sqrt(n) without.",
+    "scope": "Suitably prepared keys, nonadversarial and comparable-norm conditions in Claim 8; not a universal capacity guarantee.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Section 6.1, Claim 7; Appendix C.2, Claim 8"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "welch",
+    "text": "More than N real unit vectors force maximum absolute cosine at least sqrt((t-N)/(N(t-1))).",
+    "scope": "Forces pairwise cross-talk, not necessarily class argmax failure; derived Gram/Frobenius inequality.",
+    "evidence_type": "Formal identity",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "lift",
+    "text": "Sparse random ReLU lifts can outperform raw keys in this displayed corpus.",
+    "scope": "Row thresholds calibrated on same corpus; seed, class count, activity and finite 128-pair cap matter; not learned BDH.",
+    "evidence_type": "Teaching simplification",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Section 6.1, Observations 7 and 8"
+      },
+      {
+        "id": "explainer",
+        "locator": "Step 2"
+      }
+    ],
+    "status": "illustrative"
+  },
+  {
+    "id": "time",
+    "text": "Fixed damping suppresses old relevant and irrelevant traces; pairwise rotation changes alignment.",
+    "scope": "Synthetic fixed-frame experiment; pair-constant channel gates commute with rotations; not a learned relevance policy.",
+    "evidence_type": "Live computation",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "bdh-time",
+    "text": "The paper discusses diagonal damping and rotation blocks, and RoPE with ALiBi for stale context.",
+    "scope": "Paper-described variants; public code implements RoPE only.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Definition 4; section 6.1, natural support for long context"
+      },
+      {
+        "id": "explainer",
+        "locator": "Step 6"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "writes",
+    "text": "Gated delta applies decay to prior state before error-driven correction; KDA allows channel-wise gating.",
+    "scope": "Transposed row-neuron orientation; keys L2 normalized. This toy uses fixed scalar/channel gates, not full model architectures.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "gated",
+        "locator": "Section 3.1, Eq. 8"
+      },
+      {
+        "id": "kimi",
+        "locator": "KDA recurrence and Appendix A"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "parallel-rules",
+    "text": "Delta papers use compact WY/UT; KDA uses a chunkwise DPLR formulation.",
+    "scope": "Toy verifies direct expanded affine products only; optimized kernels are not implemented.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "delta",
+        "locator": "Section 3"
+      },
+      {
+        "id": "gated",
+        "locator": "Section 3.2"
+      },
+      {
+        "id": "kimi",
+        "locator": "Appendix A"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "regression",
+    "text": "Associative sequence memories can be organized as choices of regression objective, parameterization and optimizer.",
+    "scope": "Published framework; toy gradient signs are derived for its explicit objectives.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "regression",
+        "locator": "Sections 2 and 3"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "hybrids",
+    "text": "Qwen3-Next and Qwen3.5 report 3 Gated DeltaNet layers to 1 gated-attention layer; Kimi Linear reports 3 KDA to 1 MLA.",
+    "scope": "Published architecture descriptions, no causal diagnosis or model-quality ranking.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "qwen-next",
+        "locator": "Model overview, hybrid layout"
+      },
+      {
+        "id": "qwen35",
+        "locator": "Model overview, hidden layout"
+      },
+      {
+        "id": "kimi",
+        "locator": "Section 3.1 and Table 1"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "qwen-scale",
+    "text": "Qwen3.5-397B-A17B reports 397B total and 17B activated parameters.",
+    "scope": "Official model card overview, not a measurement in this repo.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "qwen35",
+        "locator": "Model overview"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "tensor-accounting",
+    "text": "Fixed-state scalar count is L H N D; KV count is 2 Lkv Hkv dhead T.",
+    "scope": "Tensor shapes only; public BDH materializes T × T, so recurrent execution requires a kernel; configurations differ.",
+    "evidence_type": "Teaching simplification",
+    "sources": [
+      {
+        "id": "code",
+        "locator": "BDHConfig; Attention.forward; BDH.forward"
+      }
+    ],
+    "status": "illustrative"
+  },
+  {
+    "id": "cq-memory",
+    "text": "BDH-CQ exposes recurrent memory and iterative workspace, with proprietary exact updates and dimensions.",
+    "scope": "Interface-level description; toy cannot infer proprietary capacity or circuits.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Sections 3.2 and 3.3, Eqs. 1 to 4"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "cq-binding",
+    "text": "The report's binding probe returns 96 correct outputs, 24/24 per tested binding level.",
+    "scope": "Finite demonstration-defined color-permutation task, not a universal binding/capacity guarantee.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Section 6.3"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "blog-interventions",
+    "text": "With query held fixed, context and compute interventions can localize failure without exposing state but cannot uniquely identify mechanism.",
+    "scope": "Finite tested cases and confounds; own methodological thesis, not a theorem about every system.",
+    "evidence_type": "Hypothesis",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Table 3; sections 6.5 and 7"
+      }
+    ],
+    "status": "proposed"
+  },
+  {
+    "id": "cq-table3",
+    "text": "Ordering 8: 0/24,0/24 to 12/24,13/24; nesting 5: 15/24,19/24 to 16/24,24/24.",
+    "scope": "Standard/MAX short/supported contexts; query inputs byte-identical, one target-depth demonstration added.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Table 3"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "cq-dimensions",
+    "text": "Only 3/24 length-eight ordering outputs had correct dimensions.",
+    "scope": "Separate ordering diagnostic, not Table 3's short-context scores.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Section 6.2, Figure 5 diagnostic"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "cq-composition",
+    "text": "Color swap plus relocation scored 0/72; color swap alone 26/72.",
+    "scope": "Weak acquisition is a confound; not an isolated composition-specific diagnosis.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Section 6.4"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "cq-stability",
+    "text": "ConceptARC totals matched 374/480 while 442/480 first candidates agreed.",
+    "scope": "Joint identifier/batch change, not a factorial isolation or fresh benchmark.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Sections 6.1 and 6.5"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "cq-effort",
+    "text": "LOW/MEDIUM/HIGH pass@2 were 21%,27%,29.5%.",
+    "scope": "Table 5 task set, not an intermediate-state trace or a toy result.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "cq",
+        "locator": "Section 7, Table 5"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "coconut",
+    "text": "Coconut feeds hidden states back as embeddings for continuous latent computation.",
+    "scope": "Method description, no reproduction or quantified capability claim here.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "coconut",
+        "locator": "Section 2"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "depth",
+    "text": "Recurrent-depth models repeatedly apply a shared block, exposing inference depth as a compute axis.",
+    "scope": "Method description, no checkpoint or benchmark reproduction here.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "depth",
+        "locator": "Recurrent-depth architecture and inference"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "superposition",
+    "text": "A two-layer transformer construction solves directed graph reachability in D continuous steps for graph diameter D.",
+    "scope": "Formal paper construction, not this thresholded toy or proof about proprietary systems.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "superposition",
+        "locator": "Abstract and section 4"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "synaptic-inspection",
+    "text": "Original BDH studies interpretable synaptic structure, suggesting mechanism inspection in principle.",
+    "scope": "Do not transfer this to proprietary BDH-CQ; no trained synapses inspected here.",
+    "evidence_type": "Paper-reported",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Sections 5 and 6"
+      }
+    ],
+    "status": "attributed"
+  },
+  {
+    "id": "toy-system",
+    "text": "Hebbian edge writes and monotone integrate-and-fire frontiers can exhibit coverage, compute and binding failures.",
+    "scope": "Seeded toy, not BDH or BDH-CQ; independent world/visible BFS oracles; finite controls.",
+    "evidence_type": "Teaching simplification",
+    "sources": [
+      {
+        "id": "bdh",
+        "locator": "Section 1.2"
+      },
+      {
+        "id": "explainer",
+        "locator": "Step 5"
+      }
+    ],
+    "status": "illustrative"
+  },
+  {
+    "id": "identifiability",
+    "text": "Exhaustive output-trace enumeration distinguishes or collapses three candidate faults under the displayed menu and budget.",
+    "scope": "All sequences up to 3 to 5 actions; not identification among arbitrary programs; restricted control-only round is ambiguous.",
+    "evidence_type": "Live computation",
+    "sources": [],
+    "status": "verified-in-repository"
+  },
+  {
+    "id": "architecture-intervention",
+    "text": "A delta variant inside trained BDH might improve revision behavior.",
+    "scope": "Untrained hypothesis requiring matched training and held-out ablations; not a benchmark win.",
+    "evidence_type": "Hypothesis",
+    "sources": [],
+    "status": "proposed"
+  }
+]
