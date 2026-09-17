@@ -1,7 +1,7 @@
 # Final-push guardrails
 
 - Preserve the submitted `main` revision and v1 PDF. Work on `final-push`; do not merge or promote production without an explicit switch change.
-- `PRODUCTION_PROMOTION_ALLOWED = no`; `REPLACE_SUBMITTED_BLOG_PDF = no`; `ALLOW_TRAINING_RUN = no`.
+- The user explicitly authorized updating `https://bdh-state-microscope.vercel.app/` on 2026-09-17. `PRODUCTION_PROMOTION_ALLOWED = yes` for the approved-language visual revision; `REPLACE_SUBMITTED_BLOG_PDF = no`; `ALLOW_TRAINING_RUN = no`. Preserve the historical main revision and freeze tag; deployment does not require merging the source PR.
 - Primary sources only for published-work claims. Put a section, equation, table, or code locator beside each claim. Verify the attached brief rather than trusting its fact sheet.
 - Every result is live engine computation, a committed-script replay with seed/provenance, or a cited paper-reported number. Never substitute expected numbers for measured results.
 - The user approved rewriting the blog and reader-facing copy on 2026-09-17. Do not put evidence-category badges or an audit ledger in the main reading flow. Preserve source records and verification behind optional methods notes.

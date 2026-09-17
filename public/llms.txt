@@ -1,13 +1,13 @@
 # BDH state microscope
 
-Independent educational artifact, no Pathway endorsement. Final-push v2 is preview-only pending approval; the stable production URL still serves the submitted version.
+Independent educational artifact, no Pathway endorsement. Version 2 is published at https://bdh-state-microscope.vercel.app/; the originally submitted v1 PDF remains archived at /dataforge-latent-reasoning-blog.pdf.
 
 ## Artifacts
 
-- [Guided microscope](https://bdh-state-microscope-review-drcocktails-projects.vercel.app/): compare direct causal linear attention with an accumulated memory matrix, then vary key overlap. In the one-hot-value fixture, identity-frame margin is 1 - m c; RoPE correction is computed.
-- [Lab](https://bdh-state-microscope-review-drcocktails-projects.vercel.app/lab/): seeded synthetic experiments, not trained-model evaluation.
-- [Observability essay](https://bdh-state-microscope-review-drcocktails-projects.vercel.app/blog/): a concrete rule-graph example explains how missing information and insufficient computation can be distinguished, and when observations are ambiguous.
-- [Detailed source records](https://bdh-state-microscope-review-drcocktails-projects.vercel.app/blog/claims.json): evidence types, limitations and primary-source locators, outside the main reading flow.
+- [Guided microscope](https://bdh-state-microscope.vercel.app/): compare direct causal linear attention with an accumulated memory matrix, then vary key overlap. In the one-hot-value fixture, identity-frame margin is 1 - m c; RoPE correction is computed.
+- [Lab](https://bdh-state-microscope.vercel.app/lab/): seeded synthetic experiments, not trained-model evaluation.
+- [Observability essay](https://bdh-state-microscope.vercel.app/blog/): a concrete rule-graph example explains how missing information and insufficient computation can be distinguished, and when observations are ambiguous.
+- [Detailed source records](https://bdh-state-microscope.vercel.app/blog/claims.json): evidence types, limitations and primary-source locators, outside the main reading flow.
 - [Source](https://github.com/drcocktail/bdh-state-microscope/tree/final-push): code, reproducibility and disclosure.
 
 ## Evidence policy
