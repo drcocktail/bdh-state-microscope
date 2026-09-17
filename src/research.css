@@ -107,3 +107,5 @@
 select:focus-visible,input:focus-visible,button:focus-visible,a:focus-visible,summary:focus-visible { outline: 3px solid #176bc4; outline-offset: 4px; }
 @media(max-width:650px) { .bridge-grid,.write-grid { grid-template-columns: 1fr; } .lab-controls { grid-template-columns: 1fr; padding: 1rem; } .formula-readout,.references { padding: 1rem; } .references ol { padding-left: 1.2rem; } .research-intro { padding: 2.5rem 0; grid-template-columns: 1fr; } .research-intro .eyebrow { margin-bottom: 0; } .research-main { width: calc(100% - 32px); } .research-main td,.research-main th { padding: .5rem; } }
 @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+
+.interlocutor-observation .output-bar__label small { color: #51544a; opacity: 1; }

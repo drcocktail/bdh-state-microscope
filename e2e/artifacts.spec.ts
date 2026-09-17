@@ -82,3 +82,51 @@ test('keyboard slider and focused source locator',async({page})=>{
   const citation=page.locator('#microscope .citation a').first();await citation.focus();await expect(citation.locator('..').getByRole('tooltip')).toBeVisible()
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true)
 })
+
+test('teach-back reads the explanation through the tutor and runs its probe', async({page})=>{
+  const sent:any[]=[]
+  await page.route('**/api/tutor',async route=>{
+    sent.push(route.request().postDataJSON())
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({mode:'model',model:'Groq · test',captured:2,followUp:'What happens at higher overlap?',probe:{overlap:85,load:5,claim:'At 85% overlap with 5 writes, amber still wins.'},concepts:[
+      {id:'same-answer',label:'The same answer',met:true,quote:'both routes agree',note:'You said this clearly.'},
+      {id:'what-memory-stores',label:'What memory stores',met:true,quote:'one fixed matrix',note:'Correct.'},
+      {id:'why-recall-fails',label:'Why recall can fail',met:false,quote:'',note:'Say what overlapping keys do to the read.'}]})})
+  })
+  await page.goto('/')
+  await page.getByLabel('Your explanation').fill('both routes agree because memory is one fixed matrix')
+  await page.getByRole('button',{name:'Compare with the mechanism'}).click()
+  await expect(page.getByText('2/3 concepts captured')).toBeVisible()
+  await expect(page.locator('q',{hasText:'both routes agree'})).toBeVisible()
+  await expect(page.getByText('What happens at higher overlap?')).toBeVisible()
+  // The model proposes a configuration; the engine in the page decides the outcome.
+  await page.getByRole('button',{name:/Run 5 writes at 85% overlap/}).click()
+  await expect(page.getByText(/Target margin -?\d/)).toBeVisible()
+  expect(sent[0].mode).toBe('teachback')
+  expect(sent[0].trace.overlap % 5).toBe(0)
+})
+
+test('teach-back and co-review still work when the tutor is unreachable',async({page})=>{
+  await page.route('**/api/tutor',route=>route.abort())
+  await page.goto('/')
+  await page.getByLabel('Your explanation').fill('overlapping keys make the recall fail even though both routes are exact')
+  await page.getByRole('button',{name:'Compare with the mechanism'}).click()
+  await expect(page.getByText(/concepts captured/)).toBeVisible()
+  await expect(page.getByText(/Offline rubric/)).toBeVisible()
+  await page.getByRole('button',{name:'Ask about this result'}).click()
+  await expect(page.getByText(/co-review endpoint is unavailable/)).toBeVisible()
+})
+
+test('co-review sends only bounded engine numbers',async({page})=>{
+  let payload:any=null
+  await page.route('**/api/tutor',async route=>{
+    payload=route.request().postDataJSON()
+    await route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({commentary:'Observation: recall breaks.\nInference: interference, not a trained-model claim.',model:'Groq · test',mode:'model',lens:'falsify'})})
+  })
+  await page.goto('/?askOverlap=70&askLoad=5')
+  await page.getByRole('button',{name:'Ask about this result'}).click()
+  await expect(page.getByText('recall breaks.')).toBeVisible()
+  expect(payload.mode).toBe('trace')
+  expect(payload.trace.load).toBe(5)
+  expect(payload.trace.scores).toHaveLength(3)
+  expect(JSON.stringify(payload)).not.toContain('gsk_')
+})

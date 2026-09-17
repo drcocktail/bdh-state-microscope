@@ -6,7 +6,7 @@
 - Every result is live engine computation, a committed-script replay with seed/provenance, or a cited paper-reported number. Never substitute expected numbers for measured results.
 - The user approved rewriting the blog and reader-facing copy on 2026-09-17. Do not put evidence-category badges or an audit ledger in the main reading flow. Preserve source records and verification behind optional methods notes.
 - For explanatory copy, use `skills/pathway-research-copywriting/SKILL.md`. Explain a concrete operation before naming its abstraction; introduce notation where it is used. Do not copy Pathway prose or adopt promotional architecture claims as established results.
-- No runtime LLM, chatbot, or server API. The application must work offline after the static assets load.
+- The user lifted the no-runtime-LLM rule on 17 September 2026 for the tutor route, after the PS audit found it was an adopted brief constraint rather than a PS requirement. A bounded server route may call Groq. Keys stay server side, every number shown comes from the engine, and each page must still work when the route is unavailable.
 - BDH public attention uses additive writes and RoPE; do not attribute delta rules or gates to BDH or proprietary BDH-CQ internals.
 - Do not claim model training, endorsement, universal capacity, latency savings, or cost savings. Tensor-shape accounting is not measured runtime memory.
 - All randomness uses the seeded PRNG. Seeds and control state belong in permalinks. Engine code stays free of React.

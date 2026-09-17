@@ -500,29 +500,88 @@ function JudgeChallenge() {
   )
 }
 
+const TEACHBACK_CONCEPTS = [
+  { id: 'same-answer', label: 'The same answer', pattern: /exact|equiv|identical|parity|same (answer|output|computation|result)/, guidance: 'The full matrix, the recurrent state and the chunked run all add the same contributions.' },
+  { id: 'what-memory-stores', label: 'What memory stores', pattern: /state|matrix|recurrent|chunk|parallel|fixed|compress|history/, guidance: 'Each key-value pair is added into a matrix whose shape stays fixed.' },
+  { id: 'why-recall-fails', label: 'Why recall can fail', pattern: /overlap|collision|interference|memory|address|wrong|fail|recall|lost|confus|quality/, guidance: 'Similar keys also contribute when we ask for A, and their colors can outweigh amber.' },
+] as const
+
+type Concept = { id: string; label: string; met: boolean; quote: string; note: string }
+type Probe = { overlap: number; load: number; claim: string }
+type Review = { concepts: Concept[]; captured: number; followUp: string; probe: Probe; mode: 'model' | 'fallback' | 'offline'; model: string }
+
+/** Runs when the tutor route is unreachable, so the section still works with no network. */
+function offlineReview(explanation: string, overlapPercent: number, itemCount: number): Review {
+  const normalized = explanation.toLowerCase()
+  const concepts = TEACHBACK_CONCEPTS.map((concept) => ({ id: concept.id, label: concept.label, met: concept.pattern.test(normalized), quote: '', note: concept.guidance }))
+  const captured = concepts.filter((concept) => concept.met).length
+  const overlap = Math.min(95, Math.max(0, Math.round((overlapPercent + 20) / 5) * 5))
+  return {
+    concepts,
+    captured,
+    followUp: 'Which part of the memory is shared between the keys, and why does that change the answer we read back?',
+    probe: { overlap, load: itemCount, claim: `At ${overlap}% overlap with ${itemCount} writes, amber still wins.` },
+    mode: 'offline',
+    model: 'Offline rubric (tutor unreachable)',
+  }
+}
+
+/** The tutor proposes a configuration; this runs it through the same engine as the rest of the page. */
+function ProbeResult({ probe }: { probe: Probe }) {
+  const [run, setRun] = useState(false)
+  const scenario = useMemo(() => buildAssociationScenario({ overlap: probe.overlap / 100, itemCount: probe.load }), [probe.overlap, probe.load])
+  const output = useMemo(() => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' }).outputs[scenario.queryIndex], [scenario])
+  const margin = targetMargin(output, scenario.targetIndex)
+  return (
+    <div className="teachback__probe">
+      <p className="eyebrow">Test the claim</p>
+      <p><strong>{probe.claim}</strong></p>
+      <button type="button" onClick={() => setRun(true)} disabled={run}>Run {probe.load} writes at {probe.overlap}% overlap</button>
+      {run && (
+        <div className={`teachback__probe-result ${margin > 0 ? 'is-correct' : 'is-incorrect'}`} aria-live="polite">
+          <strong>{margin > 0 ? 'Amber still wins.' : 'Amber loses.'}</strong>
+          <span>Target margin {margin.toFixed(3)}, computed in your browser by the same engine as the microscope above.</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
 function TeachBack() {
   const [answer, setAnswer] = useState('')
-  const [compared, setCompared] = useState(false)
-  const normalized = answer.toLowerCase()
+  const [review, setReview] = useState<Review | null>(null)
+  const [status, setStatus] = useState<'idle' | 'loading'>('idle')
+  const overlapPercent = 70
+  const itemCount = 5
+  const scenario = useMemo(() => buildAssociationScenario({ overlap: overlapPercent / 100, itemCount }), [])
+  const output = useMemo(() => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' }).outputs[scenario.queryIndex], [scenario])
+  const margin = targetMargin(output, scenario.targetIndex)
   const hasAttempt = answer.trim().length > 0
-  const criteria = [
-    {
-      label: 'The same answer',
-      met: /exact|equiv|identical|parity|same (answer|output|computation|result)/.test(normalized),
-      guidance: 'The full matrix, recurrent memory and batches all add the same contributions.',
-    },
-    {
-      label: 'What memory stores',
-      met: /state|matrix|recurrent|chunk|parallel|fixed|compress|history/.test(normalized),
-      guidance: 'Each key-value pair is added to a matrix whose shape stays fixed.',
-    },
-    {
-      label: 'Why recall can fail',
-      met: /overlap|collision|interference|memory|address|wrong|fail|recall|lost|confus|quality/.test(normalized),
-      guidance: 'Similar keys also contribute when we ask for A. Their colors can outweigh amber.',
-    },
-  ]
-  const captured = criteria.filter((criterion) => criterion.met).length
+
+  const compare = async () => {
+    // Too short for the tutor's minimum: teach from the attempt anyway, with no round trip.
+    if (answer.trim().length < 12) { setReview(offlineReview(answer, overlapPercent, itemCount)); return }
+    setStatus('loading')
+    try {
+      const response = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          mode: 'teachback',
+          explanation: answer.trim().slice(0, 1200),
+          trace: { overlap: overlapPercent, load: itemCount, scores: output.map((value) => Number(value.toFixed(3))), margin: Number(margin.toFixed(3)) },
+        }),
+      })
+      const payload = await response.json() as Partial<Review> & { error?: string }
+      if (!response.ok || !payload.concepts) throw new Error(payload.error ?? 'The tutor returned nothing usable.')
+      setReview(payload as Review)
+    } catch {
+      setReview(offlineReview(answer, overlapPercent, itemCount))
+    }
+    setStatus('idle')
+  }
+
+  const captured = review?.captured ?? 0
   const feedbackTitle = captured === 3
     ? 'You connected all three parts.'
     : captured === 2
@@ -538,41 +597,173 @@ function TeachBack() {
         <textarea
           id="teachback-answer"
           value={answer}
-          onChange={(event) => { setAnswer(event.target.value); setCompared(false) }}
-          placeholder="The full attention matrix and recurrent state…"
+          onChange={(event) => { setAnswer(event.target.value); setReview(null) }}
+          placeholder="Both methods add up the same values, so..."
           rows={4}
+          maxLength={1200}
         />
         <button
           type="button"
-          disabled={!hasAttempt}
+          className="reveal-button"
+          disabled={!hasAttempt || status === 'loading'}
           aria-describedby="teachback-hint"
-          onClick={() => setCompared(true)}
+          onClick={compare}
         >
-          Compare with the mechanism
+          {status === 'loading' ? 'Reading your explanation...' : 'Compare with the mechanism'}
         </button>
-        <small id="teachback-hint" className="teachback__hint">Write a sentence or two. This checks for a few keywords, so use the notes below to review your explanation yourself.</small>
-        {compared && (
+        <small id="teachback-hint" className="teachback__hint">Write a sentence or two in your own words. A reader model checks which ideas you expressed, quotes them back, and proposes one test you can run here.</small>
+        {review && (
           <div className="teachback__feedback" aria-live="polite">
             <div className="teachback__score">
               <strong>{feedbackTitle}</strong>
               <span>{captured}/3 concepts captured</span>
             </div>
             <ul>
-              {criteria.map((criterion) => (
-                <li className={criterion.met ? 'is-captured' : 'is-missing'} key={criterion.label}>
-                  <span>{criterion.met ? 'Mentioned' : 'Check this'}</span>
-                  <strong>{criterion.label}</strong>
-                  <p>{criterion.guidance}</p>
+              {review.concepts.map((concept) => (
+                <li className={concept.met ? 'is-captured' : 'is-missing'} key={concept.id}>
+                  <span>{concept.met ? 'Mentioned' : 'Check this'}</span>
+                  <div>
+                    <strong>{concept.label}</strong>
+                    {concept.quote && <q>{concept.quote}</q>}
+                    <p>{concept.note}</p>
+                  </div>
                 </li>
               ))}
             </ul>
             {captured < 3 && (
               <p className="teachback__scaffold">
-                <strong>A place to start:</strong> “Both methods add up the same values, weighted by… A wrong color can win when…”
+                <strong>A place to start:</strong> "Both methods add up the same values, weighted by... A wrong color can win when..."
               </p>
             )}
+            <p className="teachback__followup"><strong>Next question:</strong> {review.followUp}</p>
+            <ProbeResult probe={review.probe} />
+            <p className="teachback__provenance">{review.mode === 'model' ? review.model : review.model}. The model reads your words and this trace; every number here is computed by the engine in your browser.</p>
           </div>
         )}
+      </div>
+    </section>
+  )
+}
+
+const TRACE_LENSES = [
+  { id: 'falsify', label: 'Try to falsify it', note: 'Ask for the next discriminating test.' },
+  { id: 'connect', label: 'Connect to BDH-CQ', note: 'Separate analogy from evidence.' },
+  { id: 'teach', label: 'Teach the distinction', note: 'Turn the trace into a check question.' },
+] as const
+
+type TraceLens = (typeof TRACE_LENSES)[number]['id']
+
+function CommentaryPoints({ commentary }: { commentary: string }) {
+  const points = commentary
+    .split(/\n+/)
+    .map((line) => line.trim().replace(/^[-•]\s*/, '').replaceAll('**', ''))
+    .filter(Boolean)
+    .map((line) => {
+      const match = line.match(/^(Observation|Inference|Next test|Check question)\s*[:\u2014-]?\s*(.*)$/i)
+      return match ? { label: match[1], text: match[2] } : { label: 'Co-review', text: line }
+    })
+  return (
+    <ol className="interlocutor-commentary" aria-live="polite">
+      {points.map((point, index) => <li key={`${point.label}-${index}`}><strong>{point.label}</strong><span>{point.text}</span></li>)}
+    </ol>
+  )
+}
+
+function ResearchInterlocutor() {
+  const [lens, setLens] = useState<TraceLens>('falsify')
+  const [overlapPercent, setOverlapPercent] = useUrlNumber('askOverlap', 70, 0, 95)
+  const [itemCount, setItemCount] = useUrlNumber('askLoad', 5, 1, 7)
+  const [commentary, setCommentary] = useState('')
+  const [modelName, setModelName] = useState('')
+  const [status, setStatus] = useState<'idle' | 'loading' | 'ready'>('idle')
+  const overlap = Math.round(overlapPercent / 5) * 5
+  const load = Math.round(itemCount)
+  const scenario = useMemo(() => buildAssociationScenario({ overlap: overlap / 100, itemCount: load }), [overlap, load])
+  const output = useMemo(() => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' }).outputs[scenario.queryIndex], [scenario])
+  const prediction = argMax(output)
+  const margin = targetMargin(output, scenario.targetIndex)
+  const invalidate = () => { setCommentary(''); setModelName(''); setStatus('idle') }
+
+  const ask = async () => {
+    setStatus('loading')
+    try {
+      const response = await fetch('/api/tutor', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mode: 'trace', lens, trace: { overlap, load, scores: output.map((value) => Number(value.toFixed(3))), margin: Number(margin.toFixed(3)) } }),
+      })
+      const payload = await response.json() as { commentary?: string; model?: string; error?: string }
+      if (!response.ok || !payload.commentary) throw new Error(payload.error ?? 'No commentary returned.')
+      setCommentary(payload.commentary)
+      setModelName(payload.model ?? 'Co-review')
+      setStatus('ready')
+    } catch (error) {
+      setCommentary(`The co-review endpoint is unavailable: ${error instanceof Error ? error.message : 'unknown error'}. The experiment above is unaffected; it runs entirely in your browser.`)
+      setModelName('Endpoint unavailable')
+      setStatus('ready')
+    }
+  }
+
+  return (
+    <section className="interlocutor-section" id="interrogate" aria-labelledby="interlocutor-title">
+      <div className="section-heading section-heading--split">
+        <div>
+          <p className="eyebrow">Ask about a live trace</p>
+          <h2 id="interlocutor-title">What would a reviewer ask next?</h2>
+        </div>
+        <div className="interlocutor-intro">
+          <p>Choose a configuration and ask a model to challenge it, connect it to BDH-CQ, or turn it into a check question. It receives only the numbers computed below, and its reply is interpretation, not measurement.</p>
+          <a href="/blog/">Read the essay this connects to</a>
+        </div>
+      </div>
+      <div className="interlocutor-grid">
+        <article className="interlocutor-controls">
+          <span className="interlocutor-label">1 · Choose the question</span>
+          <div className="interlocutor-lenses" role="group" aria-label="Analysis lens">
+            {TRACE_LENSES.map((option) => (
+              <button type="button" aria-pressed={lens === option.id} onClick={() => { setLens(option.id); invalidate() }} key={option.id}>
+                <strong>{option.label}</strong><small>{option.note}</small>
+              </button>
+            ))}
+          </div>
+          <label className="interlocutor-slider" htmlFor="ask-overlap">
+            <span><strong>Shared key direction</strong><output>{overlap}%</output></span>
+            <input id="ask-overlap" type="range" min="0" max="95" step="5" value={overlap} onChange={(event) => { setOverlapPercent(Number(event.target.value)); invalidate() }} />
+          </label>
+          <label className="interlocutor-slider" htmlFor="ask-load">
+            <span><strong>Associations written</strong><output>{load}</output></span>
+            <input id="ask-load" type="range" min="1" max="7" step="1" value={load} onChange={(event) => { setItemCount(Number(event.target.value)); invalidate() }} />
+          </label>
+        </article>
+        <article className="interlocutor-observation">
+          <span className="interlocutor-label">2 · Computed in your browser</span>
+          <div className={`interlocutor-verdict ${prediction === scenario.targetIndex ? 'is-pass' : 'is-fail'}`}>
+            <span>target A → amber</span>
+            <strong>argmax → {VALUE_LABELS[prediction]}</strong>
+            <small>target margin {margin > 0 ? '+' : ''}{margin.toFixed(3)}</small>
+          </div>
+          <OutputBars output={output} targetIndex={scenario.targetIndex} />
+          <p>Computed locally with RoPE on. These numbers are the only evidence the model receives.</p>
+        </article>
+        <article className="interlocutor-response">
+          <div className="interlocutor-response__heading">
+            <span className="interlocutor-label">3 · The reply</span>
+            <small>{modelName || 'Groq, GPT-OSS 120B'}</small>
+          </div>
+          {status === 'idle' && <p className="interlocutor-placeholder">The reply is bounded to three points and is never used to calculate or check the experiment.</p>}
+          {status === 'loading' && <p className="interlocutor-placeholder" aria-live="polite">Reading the trace...</p>}
+          {status === 'ready' && <CommentaryPoints commentary={commentary} />}
+          <button type="button" onClick={ask} disabled={status === 'loading'}>
+            {status === 'loading' ? 'Asking...' : status === 'ready' ? 'Ask again' : 'Ask about this result'}
+          </button>
+          <small className="interlocutor-boundary">Only bounded, re-checked trace summaries are sent. If the endpoint is unavailable, the page keeps working and says so.</small>
+        </article>
+      </div>
+      <div className="interlocutor-sources">
+        <span>Primary sources</span>
+        <SourceLink href={SOURCES.bdhCq}>BDH-CQ</SourceLink>
+        <SourceLink href={SOURCES.coconut}>Coconut</SourceLink>
+        <SourceLink href={SOURCES.recurrentDepth}>Recurrent depth</SourceLink>
       </div>
     </section>
   )
@@ -627,6 +818,7 @@ export default function App() {
         <BdhBridge />
         <OneMinuteCheck />
         <JudgeChallenge />
+        <ResearchInterlocutor />
         <TeachBack />
         <MethodsNotes /><section className="lab-invitation"><h2>What would you change in this memory?</h2><p>Try more dimensions, sparser codes, decay or a different write rule. Each lab experiment changes one part of the design.</p><a href="/lab/">Open the lab</a><a href="/blog/">Reasoning without a transcript</a></section><References />
       </main>

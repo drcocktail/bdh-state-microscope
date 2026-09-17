@@ -16,5 +16,9 @@ for(const path of ['src/App.tsx','src/Lab.tsx','src/Blog.tsx','src/components/Ev
 const expected='2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9'
 for(const path of ['public/dataforge-latent-reasoning-blog.pdf','output/pdf/dataforge-latent-reasoning-blog.pdf'])if(createHash('sha256').update(readFileSync(path)).digest('hex')!==expected)fail('Frozen v1 PDF changed')
 const scripts=readdirSync('dist/assets').filter(f=>f.endsWith('.js')).map(f=>readFileSync(`dist/assets/${f}`,'utf8')).join('\n')
-if(/groq|fetch\s*\(\s*["'`]\/api\//i.test(scripts))fail('Runtime API remains in bundle')
-console.log(`Frozen PDF hash verified; no model/API runtime; ${scripts.length} JS bytes before gzip.`)
+if(/gsk_[A-Za-z0-9]/.test(scripts))fail('A model API key reached the browser bundle')
+if(/api\.groq\.com/i.test(scripts))fail('The model endpoint must stay server side')
+const tutor=readFileSync('api/tutor.ts','utf8')
+if(!tutor.includes('deterministicReview')||!tutor.includes('fallbackCommentary'))fail('Tutor route lost its offline fallback')
+if(!/GROQ_API_KEY/.test(tutor))fail('Tutor route must read its key from the environment')
+console.log(`Frozen PDF hash verified; no key or model endpoint in the bundle; tutor fallback present; ${scripts.length} JS bytes before gzip.`)

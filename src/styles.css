@@ -2035,7 +2035,7 @@ footer p { margin: 0; }
 .interlocutor-verdict.is-pass { color: var(--green); }
 .interlocutor-verdict.is-fail { color: var(--red); }
 .interlocutor-verdict span,
-.interlocutor-verdict small { font-size: 0.66rem; }
+.interlocutor-verdict small { font-size: 0.72rem; color: var(--ink); }
 .interlocutor-verdict strong { font-family: Georgia, "Times New Roman", serif; font-size: 1.7rem; font-weight: 500; }
 
 .interlocutor-observation .output-bar__track {
