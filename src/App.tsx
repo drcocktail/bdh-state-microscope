@@ -16,7 +16,12 @@ import {
   comparePlasticityRules,
   identicalKeyConflict,
   runOverlapSweep,
+  predictedBoundary, fixtureMargin, distractorMultiplicity,
 } from './engine/scenarios'
+
+import { Citation, References, ArtifactFooter } from './components/Evidence'
+import { OneMinuteCheck } from './components/OneMinuteCheck'
+import { useUrlNumber } from './components/controls'
 
 const SOURCES = {
   bdh: 'https://arxiv.org/abs/2509.26507',
@@ -30,18 +35,10 @@ const SOURCES = {
   zoology: 'https://arxiv.org/abs/2312.04927',
 }
 
-const ESSAY_LENSES = [
-  { id: 'falsify', label: 'Try to falsify it', note: 'Demand the next discriminating test.' },
-  { id: 'connect', label: 'Connect to BDH-CQ', note: 'Separate analogy from evidence.' },
-  { id: 'teach', label: 'Teach the distinction', note: 'Turn the trace into a check question.' },
-] as const
-
-type EssayLens = (typeof ESSAY_LENSES)[number]['id']
-
 const PRESETS = [
   { name: 'Separated', note: 'Distinct directions; recall holds.', overlap: 0.08, itemCount: 6 },
   { name: 'Collision', note: 'Same state shape; recall breaks.', overlap: 0.82, itemCount: 6 },
-  { name: 'High load', note: 'Seven writes into 8 × 3 state.', overlap: 0.58, itemCount: 7 },
+  { name: 'Seven writes, 58% overlap', note: 'Interference, not a full state.', overlap: 0.58, itemCount: 7 },
 ] as const
 
 const valueColor = (index: number) =>
@@ -63,7 +60,7 @@ function EvidenceTag({
 function SourceLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <a href={href} target="_blank" rel="noreferrer" className="source-link">
-      {children}<span aria-hidden="true"> ↗</span>
+      {children}
     </a>
   )
 }
@@ -178,7 +175,7 @@ function CausalMatrix({
       className="causal-matrix"
       style={{ '--causal-columns': labels.length } as CSSProperties}
       role="img"
-      aria-label={`Strictly causal score matrix. Selected row ${selected + 1}. Diagonal and future cells are zero.`}
+      aria-label={`Strictly causal score matrix. Selected row ${selected + 1}: ${scores[selected].map(v => v.toFixed(4)).join(', ')}. Diagonal and future cells are zero.`}
     >
       <span />
       {labels.map((label) => <span className="causal-matrix__axis" key={`top-${label}`}>{label}</span>)}
@@ -199,7 +196,7 @@ function CausalMatrix({
                 title={`${labels[rowIndex]} attends to ${labels[columnIndex]}: ${value.toFixed(6)}`}
                 key={`${rowIndex}-${columnIndex}`}
               >
-                {isMasked ? '·' : formatNumber(value, 2)}
+                {isMasked ? ';' : formatNumber(value, 2)}
               </span>
             )
           })}
@@ -215,19 +212,20 @@ function makeChunkSchedule(length: number): number[] {
 }
 
 function StateMicroscope() {
-  const [overlap, setOverlap] = useState<number>(PRESETS[1].overlap)
-  const [itemCount, setItemCount] = useState<number>(PRESETS[1].itemCount)
+  const [overlap, setOverlap] = useUrlNumber('overlap', PRESETS[1].overlap, 0, 0.95)
+  const [itemCount, setItemCount] = useUrlNumber('load', PRESETS[1].itemCount, 1, 7)
+  const [ropeBase, setRopeBase] = useUrlNumber('base', 2 ** 16, 10000, 65536)
   const scenario = useMemo(() => buildAssociationScenario({ overlap, itemCount }), [overlap, itemCount])
-  const [selectedStep, setSelectedStep] = useState<number>(scenario.queryIndex)
+  const [selectedStep, setSelectedStep] = useUrlNumber('step', scenario.queryIndex, 0, 7)
   const safeStep = Math.min(selectedStep, scenario.queryIndex)
-  const parallel = useMemo(() => runParallel(scenario.tokens, { rotation: 'rope' }), [scenario])
+  const parallel = useMemo(() => runParallel(scenario.tokens, { rotation: 'rope', ropeBase }), [scenario, ropeBase])
   const recurrent = useMemo(
-    () => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' }),
-    [scenario],
+    () => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive', ropeBase }),
+    [scenario, ropeBase],
   )
   const chunked = useMemo(
-    () => runChunked(scenario.tokens, makeChunkSchedule(scenario.tokens.length), { rotation: 'rope' }),
-    [scenario],
+    () => runChunked(scenario.tokens, makeChunkSchedule(scenario.tokens.length), { rotation: 'rope', ropeBase }),
+    [scenario, ropeBase],
   )
   const outputParity = maxAbsDifference(parallel.outputs, recurrent.outputs)
   const stateParity = maxAbsDifference(parallel.finalState, recurrent.finalState)
@@ -236,7 +234,7 @@ function StateMicroscope() {
   const selectedRecord = recurrent.steps[safeStep]
   const queryOutput = recurrent.outputs[scenario.queryIndex]
   const prediction = argMax(queryOutput)
-  const passes = prediction === scenario.targetIndex
+  const passes = targetMargin(queryOutput, scenario.targetIndex) > 0
   const margin = targetMargin(queryOutput, scenario.targetIndex)
   const labels = scenario.tokens.map((token) => token.id)
 
@@ -249,7 +247,7 @@ function StateMicroscope() {
   return (
     <section className="lab-shell" id="microscope" aria-labelledby="microscope-title">
       <div className="section-kicker">
-        <EvidenceTag>REPRODUCED LOCALLY</EvidenceTag>
+        <EvidenceTag>Live computation</EvidenceTag>
         <span>One typed engine drives the oracle, recurrence, tests, and every cell below.</span>
       </div>
       <div className="lab-heading">
@@ -259,10 +257,11 @@ function StateMicroscope() {
         </div>
         <div className="parity-certificate" aria-live="polite">
           <span>max numerical error</span><strong>{outputParity.toExponential(1)}</strong>
-          <small>{outputParity < 1e-10 ? 'PARITY PASS' : 'PARITY FAILED'}</small>
+          <small>{outputParity < 1e-10 ? 'Parity pass' : 'Parity failed'}</small>
         </div>
       </div>
 
+      <details className="formula-readout"><summary>Derive one row of the identity</summary><p>Expand the carried state Sₜ₋₁ = Σₛ&lt;ₜ rₛᵀvₛ. Then oₜ = rₜSₜ₋₁ = Σₛ&lt;ₜ (rₜ · rₛ)vₛ. This is exactly row t of the strictly lower-triangular score matrix times V. Each write is an outer product: its cell (i,j) changes by rₜ[i]vₜ[j]. Query-only tokens do not write.</p><p>Chunking splits the sum into prior-chunk state and within-chunk masked products. It changes scheduling, not the sum, when the carried state is exact.</p></details>
       <div className="preset-row" aria-label="Microscope presets">
         {PRESETS.map((preset) => {
           const selected = preset.overlap === overlap && preset.itemCount === itemCount
@@ -284,7 +283,7 @@ function StateMicroscope() {
         <article className="computation-panel computation-panel--history">
           <div className="panel-heading">
             <span className="step-index">A</span>
-            <div><h3>Parallel causal oracle</h3><p>Materialize every permitted query–key score, then multiply by values.</p></div>
+            <div><h3>Parallel causal oracle</h3><p>Materialize every permitted query-key score, then multiply by values.</p></div>
           </div>
           <CausalMatrix scores={parallel.scores} labels={labels} selected={safeStep} />
           <code className="panel-equation">O = tril(QKᵀ, −1)V</code>
@@ -301,13 +300,13 @@ function StateMicroscope() {
             rowLabels={Array.from({ length: KEY_DIMENSION }, (_, index) => `k${index + 1}`)}
             columnLabels={VALUE_LABELS}
           />
-          <code className="panel-equation">oₜ = rₜSₜ₋₁ · Sₜ = Sₜ₋₁ + rₜᵀvₜ</code>
+          <code className="panel-equation">oₜ = rₜSₜ₋₁ ; Sₜ = Sₜ₋₁ + rₜᵀvₜ</code>
         </article>
       </div>
 
       <div className="step-console">
         <div className="step-console__control">
-          <label htmlFor="token-step"><span>Inspect causal step</span><strong>{safeStep + 1}/{scenario.tokens.length} · {selectedToken.label}</strong></label>
+          <label htmlFor="token-step"><span>Inspect causal step</span><strong>{safeStep + 1}/{scenario.tokens.length} ; {selectedToken.label}</strong></label>
           <input
             id="token-step"
             type="range"
@@ -349,10 +348,11 @@ function StateMicroscope() {
         </div>
       </div>
 
+      <div className="formula-readout" aria-live="polite"><code>margin(U = I) = 1 - m c = 1 - {distractorMultiplicity(itemCount)} × {overlap.toFixed(2)} = {fixtureMargin(overlap, itemCount).toFixed(6)}</code><p>Computed margin {margin.toFixed(6)}. RoPE correction {(margin - fixtureMargin(overlap, itemCount)).toExponential(3)}. This formula is exact only for this one-hot-value fixture with U = I; ties are not strict recall.</p><label>RoPE base <select aria-label="RoPE base" value={ropeBase} onChange={e => setRopeBase(Number(e.target.value))}><option value={65536}>2^16 (official)</option><option value={10000}>10^4</option></select></label><p>The target is in the slowest-rotating pair. Parity does not depend on the base. <Citation id="code" locator="get_freqs, theta=2**16; Attention.forward" /></p><a href={window.location.href}>Permalink to this state</a></div>
       <div className="control-deck control-deck--microscope">
         <div className="control-intro">
           <p className="eyebrow">Change the substrate</p><h3>Make the fixed state collide.</h3>
-          <p>RoPE stays on. Only address overlap and write load change.</p>
+          <p>RoPE stays on. Keys, write load and base are learner-controlled.</p>
         </div>
         <label className="control" htmlFor="overlap-control">
           <span><strong>Shared key direction</strong><output>{Math.round(overlap * 100)}%</output></span>
@@ -391,7 +391,8 @@ function StateMicroscope() {
 }
 
 function BoundaryPlot() {
-  const [load, setLoad] = useState(6)
+  const [load, setLoad] = useUrlNumber('sweepLoad', 6, 1, 7)
+  const prediction = predictedBoundary(load)
   const sweep = useMemo(() => runOverlapSweep(load, 38), [load])
   const width = 660
   const height = 250
@@ -408,7 +409,7 @@ function BoundaryPlot() {
     <section className="boundary-section" id="boundary" aria-labelledby="boundary-title">
       <div className="section-heading section-heading--split">
         <div>
-          <EvidenceTag>CONTROLLED SYNTHETIC RESULT</EvidenceTag>
+          <EvidenceTag>Live computation</EvidenceTag>
           <p className="eyebrow">Failure boundary</p>
           <h2 id="boundary-title">Equivalence can be exact while recall is wrong.</h2>
         </div>
@@ -424,8 +425,9 @@ function BoundaryPlot() {
         <div className="plot-wrap">
           <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-labelledby="plot-title plot-desc">
             <title id="plot-title">Recall margin versus key overlap</title>
-            <desc id="plot-desc">Recall margin falls as target and distractor keys overlap. A negative margin means the competitor wins.</desc>
+            <desc id="plot-desc">{sweep.map(p => `${(p.overlap * 100).toFixed(1)} percent: margin ${p.margin.toFixed(4)}`).join('; ')}. Nonpositive margin is not strict recall.</desc>
             <line className="plot-zero" x1={padding.left} x2={width - padding.right} y1={y(0)} y2={y(0)} />
+            {prediction !== null && <><line stroke="var(--ink)" strokeDasharray="5 5" x1={x(prediction)} x2={x(prediction)} y1={padding.top} y2={height - padding.bottom} /><text x={x(prediction) + 5} y={34}>Predicted {(prediction * 100).toFixed(1)}%</text></>}
             <polyline className="plot-line" points={points} />
             {sweep.map((point) => (
               <circle
@@ -439,8 +441,8 @@ function BoundaryPlot() {
           </svg>
         </div>
         <div className="boundary-readout" aria-live="polite">
-          <span>first sampled failure</span>
-          <strong>{boundary ? `${Math.round(boundary.overlap * 100)}% overlap` : 'not reached'}</strong>
+          <span>Prediction beside measurement</span>
+          <strong>Predicted {prediction === null ? 'outside slider' : `${(prediction * 100).toFixed(1)}%`}, first sampled failure {boundary ? `${Math.round(boundary.overlap * 100)}%` : 'not reached'}</strong>
           <p>At load {load}, the amber score first stops exceeding both competitors at this sampled point. It is a mechanism probe, not a trained-model benchmark.</p>
         </div>
       </div>
@@ -449,75 +451,31 @@ function BoundaryPlot() {
 }
 
 function PlasticityLab() {
-  const comparison = useMemo(() => comparePlasticityRules(), [])
+  const [beta, setBeta] = useUrlNumber('beta', 1, 0, 1)
+  const [orthogonalValue, setOrthogonalValue] = useUrlNumber('orthogonal', 0, 0, 1)
+  const orthogonal = orthogonalValue === 1
+  const comparison = useMemo(() => comparePlasticityRules(beta, orthogonal), [beta, orthogonal])
   const conflict = useMemo(() => identicalKeyConflict(), [])
-  const rowLabels = Array.from({ length: KEY_DIMENSION }, (_, index) => `k${index + 1}`)
-  return (
-    <section className="plasticity-section" id="plasticity" aria-labelledby="plasticity-title">
-      <div className="section-heading section-heading--split">
-        <div>
-          <EvidenceTag tone="formal">BOUNDED ARCHITECTURE PROBE</EvidenceTag>
-          <p className="eyebrow">Plasticity, isolated</p>
-          <h2 id="plasticity-title">Can the state revise, not merely accumulate?</h2>
-        </div>
-        <p>We pin positional rotation to <code>U = I</code>, keep the same 8 × 3 state, and change only the write rule. The stream says A → amber, then corrects A → violet.</p>
-      </div>
-      <div className="plasticity-grid">
-        <article className="rule-card rule-card--additive">
-          <div className="rule-card__heading"><div><span>baseline</span><h3>Additive Hebbian write</h3></div><EvidenceTag>REPRODUCED</EvidenceTag></div>
-          <code>S ← S + kᵀv</code>
-          <MatrixHeatmap matrix={comparison.additive.state} title="S" rowLabels={rowLabels} columnLabels={VALUE_LABELS} compact />
-          <OutputBars output={comparison.additive.output} targetIndex={1} />
-          <div className="rule-verdict rule-verdict--fail"><span>read A</span><strong>[1, 1, 0] · old and new tie</strong><small>MSE to correction: {comparison.additive.error.toFixed(3)}</small></div>
-        </article>
-        <article className="rule-card rule-card--delta">
-          <div className="rule-card__heading"><div><span>controlled intervention</span><h3>Normalized delta write</h3></div><EvidenceTag>REPRODUCED</EvidenceTag></div>
-          <code>S ← S + βkᵀ(v − kS)/(‖k‖² + ε)</code>
-          <MatrixHeatmap matrix={comparison.delta.state} title="S" rowLabels={rowLabels} columnLabels={VALUE_LABELS} compact />
-          <OutputBars output={comparison.delta.output} targetIndex={1} />
-          <div className="rule-verdict rule-verdict--pass"><span>read A</span><strong>[0, 1, 0] · correction replaces trace</strong><small>MSE to correction: {comparison.delta.error.toExponential(1)}</small></div>
-        </article>
-      </div>
-      <aside className="negative-control">
-        <div><EvidenceTag tone="limit">NEGATIVE CONTROL</EvidenceTag><h3>One identical address cannot answer two incompatible questions.</h3></div>
-        <p>If the same key must simultaneously return amber and violet with no context bit, any deterministic state read produces the same output for both. The delta rule chooses the latest correction; it does not defeat missing information.</p>
-        <div className="negative-control__math"><code>same k → same kS</code><span>{conflict.simultaneouslySatisfiable ? 'satisfiable' : 'not simultaneously satisfiable'}</span></div>
-      </aside>
-    </section>
-  )
+  const rowLabels = Array.from({ length: KEY_DIMENSION }, (_, i) => `k${i + 1}`)
+  return <section className="plasticity-section" id="plasticity" aria-labelledby="plasticity-title">
+    <div className="section-heading section-heading--split"><div><EvidenceTag>Live computation</EvidenceTag><p className="eyebrow">Plasticity, isolated</p><h2 id="plasticity-title">Can the state revise, not merely accumulate?</h2></div><p>With U = I, change the write rule, not the state shape. These comparison rules are not BDH's public additive update. <Citation id="delta" locator="Section 2.2, delta recurrence" /></p></div>
+    <div className="formula-readout"><label htmlFor="beta-control">Correction strength β: {beta.toFixed(2)}</label><input id="beta-control" type="range" min="0" max="1" step="0.05" value={beta} onChange={e => setBeta(Number(e.target.value))} /><div className="prediction-buttons"><button aria-pressed={!orthogonal} onClick={() => setOrthogonalValue(0)}>Same key</button><button aria-pressed={orthogonal} onClick={() => setOrthogonalValue(1)}>Orthogonal key</button></div><code>{orthogonal ? `read B = β violet = ${beta.toFixed(3)} violet` : `read A = β(1 - β) amber + β violet = ${(beta * (1 - beta)).toFixed(3)} amber + ${beta.toFixed(3)} violet`}</code><p>Unit keys, two writes, zero initial state. Orthogonal keys make the delta write a β-scaled additive write.</p></div>
+    <div className="plasticity-grid">{(['additive', 'delta'] as const).map(rule => <article className={`rule-card rule-card--${rule}`} key={rule}><div className="rule-card__heading"><h3>{rule === 'additive' ? 'Additive Hebbian write' : 'Normalized delta write'}</h3><EvidenceTag>Live computation</EvidenceTag></div><code>{rule === 'additive' ? 'S ← S + kᵀv' : 'S ← S + βkᵀ(v - kS)/‖k‖²'}</code><MatrixHeatmap matrix={comparison[rule].state} title="S" rowLabels={rowLabels} columnLabels={VALUE_LABELS} compact /><OutputBars output={comparison[rule].output} targetIndex={1} /><div className="rule-verdict"><span>Computed read {orthogonal ? 'B' : 'A'}</span><strong>[{comparison[rule].output.map(v => v.toFixed(3)).join(', ')}]</strong><small>MSE to violet {comparison[rule].error.toFixed(6)}</small></div></article>)}</div>
+    <p>The masked-matrix identity above covers additive writes. Delta variants have different exact parallel forms, not that same masked matrix. <Citation id="delta" locator="Section 3, compact WY" /> <a href="/lab/#writes">Compare write rules in the lab</a>.</p>
+    <aside className="negative-control"><div><EvidenceTag tone="formal">Formal identity</EvidenceTag><h3>One identical address cannot answer two incompatible questions.</h3></div><p>The optimal common read is [{conflict.optimalRead.join(', ')}], with MSE {conflict.optimalErrors[0].toFixed(6)} to each one-hot target. The β = 1 delta read has MSE {conflict.errors[0].toFixed(6)} to amber and {conflict.errors[1].toFixed(6)} to violet. It chooses a correction, not missing information.</p><div className="negative-control__math"><code>same k implies same kS</code><span>{conflict.simultaneouslySatisfiable ? 'satisfiable' : 'not simultaneously satisfiable'}</span></div></aside>
+  </section>
 }
 
 function BdhBridge() {
-  return (
-    <section className="bridge-section" id="bridge" aria-labelledby="bridge-title">
-      <div className="section-heading section-heading--split">
-        <div><EvidenceTag tone="paper">PAPER-SUPPORTED CONTEXT</EvidenceTag><p className="eyebrow">The bridge to BDH</p><h2 id="bridge-title">Small enough to see. Exact enough to matter.</h2></div>
-        <p>BDH’s sparse hidden activations supply keys and projected activations supply values. Its causal linear attention admits this recurrent state view. The microscope transposes the paper’s state orientation so key dimensions are rows and value channels are columns.</p>
-      </div>
-      <div className="bridge-grid">
-        <article className="paper-equation">
-          <span>BDH paper · recurrent state update</span>
-          <code>ρₜ,ₗ = (ρₜ₋₁,ₗ + LN(Eyₜ,ₗ₋₁)xₜ,ₗᵀ)U</code>
-          <p>State plus an outer-product write, followed by the positional rotation operator.</p>
-          <SourceLink href={SOURCES.bdh}>Read the BDH paper</SourceLink>
-        </article>
-        <article className="mapping-card">
-          <span>microscope mapping</span>
-          <dl>
-            <div><dt>BDH sparse activity x</dt><dd>key / address rₜ</dd></div>
-            <div><dt>projected activity LN(Ey)</dt><dd>value vₜ</dd></div>
-            <div><dt>attention history</dt><dd>fixed state S</dd></div>
-            <div><dt>causal mask</dt><dd>read before current write</dd></div>
-          </dl>
-          <SourceLink href={SOURCES.implementation}>Inspect the official implementation</SourceLink>
-        </article>
-        <article className="boundary-card-small">
-          <span>evidence boundary</span><h3>This is not a trained BDH checkpoint.</h3>
-          <p>It executes the attention-state mechanism and controlled synthetic probes. Whether a delta-style write improves a full trained BDH requires matched training, language benchmarks, compute, and ablations.</p>
-        </article>
-      </div>
-    </section>
-  )
+  return <section className="bridge-section" id="bridge" aria-labelledby="bridge-title"><div className="section-heading section-heading--split"><div><EvidenceTag tone="paper">Paper-reported</EvidenceTag><p className="eyebrow">The bridge to BDH</p><h2 id="bridge-title">Small enough to inspect. Linked to the real architecture.</h2></div><p>The microscope isolates attention products. It excludes LayerNorm, learned encoders, training and the full BDH block.</p></div>
+    <div className="bridge-grid">
+      <article className="paper-equation"><h3>Two frames, one attention product</h3><code>ρₜ = (ρₜ₋₁ + vₜxₜᵀ)U</code><p>Paper Eq. 8 uses D × N. Our S has neurons as rows and value channels as columns, and rotates keys by absolute position. The frame relation is Sᵀ = ρ U^(-T). <Citation id="bdh" locator="Eq. 8" /></p><p><EvidenceTag tone="formal">Precomputed replay</EvidenceTag> The CPU conformance replay against pinned official attention passed: maximum attention error 2.66e-15; frame error 2.40e-14.</p><a href="https://github.com/drcocktail/bdh-state-microscope/blob/final-push/research/README.md">Conformance script and scope</a></article>
+      <article className="mapping-card"><h3>Why the neuron space is large</h3><p>Before RoPE, public keys and queries are the same sparse non-negative ReLU vector. The default configuration gives 8,192 neurons per head, 256 value channels and 4 heads: 8,388,608 state scalars per layer, independent of T. Here: 24. <Citation id="code" locator="BDHConfig and BDH.forward" /></p><p>Claim 7 gives order-n distinguishable facts with weak-correlation assumptions, order-√n without. Preparation and nonadversarial conditions matter. <Citation id="bdh" locator="Section 6.1, Claim 7; Appendix C.2, Claim 8" /></p><a href="/lab/#lift">Test a random lift, not a learned BDH encoder</a></article>
+      <article className="mapping-card"><h3>U changes the treatment of time</h3><p>Rotation blocks supply RoPE; diagonal damping supplies ALiBi-like decay. The paper describes damping stale context and possible selective forgetting. The public code implements RoPE only. <Citation id="bdh" locator="Definition 4; section 6.1, natural support for long context" /><Citation id="explainer" locator="Chapter 2, Step 6" /><Citation id="code" locator="Attention.forward" /></p><a href="/lab/#time">Measure the recency trade-off</a></article>
+      <article className="mapping-card"><h3>BDH-CQ is not this toy</h3><p>The report writes Sₜ = Uθ(Sₜ₋₁, Dₜ), avoiding a growing explicit KV cache, and names additive linear attention as a special case. Exact update and dimensions are proprietary. <Citation id="cq" locator="Sections 3.2 and 3.3" /></p><p>Its color-binding probe reports 96 correct outputs, 24/24 at each tested binding level. That does not reveal state capacity. <Citation id="cq" locator="Section 6.3" /></p><a href="/blog/">Explore what interface tests can establish</a></article>
+    </div><aside className="negative-control"><h3>This is not a trained checkpoint.</h3><p>A full-model improvement would require matched training, held-out benchmarks and ablations. No training or benchmark win is claimed.</p></aside>
+    <p className="why-now">Why now: Qwen3-Next and Qwen3.5 use a 3:1 Gated DeltaNet to gated-attention layout; Qwen3.5 reports 397B total parameters. Kimi Linear mixes channel-gated KDA with MLA at 3:1. <Citation id="qwen-next" /><Citation id="qwen35" /><Citation id="kimi" locator="Section 3.1 and Table 1" /> This probe illustrates interference, not a causal diagnosis of those models.</p>
+  </section>
 }
 
 function JudgeChallenge() {
@@ -529,9 +487,9 @@ function JudgeChallenge() {
   const error = maxAbsDifference(oracle.outputs, chunks.outputs)
   const correct = prediction === 'same'
   return (
-    <section className="challenge-section" id="test" aria-labelledby="challenge-title">
+    <section className="challenge-section" id="chunk-check" aria-labelledby="challenge-title">
       <div className="challenge-copy">
-        <EvidenceTag tone="formal">60-SECOND JUDGE TEST</EvidenceTag>
+        <EvidenceTag tone="formal">Formal identity</EvidenceTag>
         <h2 id="challenge-title">Seven writes. Three chunks. One carried state.</h2>
         <p>Will splitting the exact same sequence into chunks <code>[2, 3, 3]</code> change the final token outputs? Commit before revealing the computed result.</p>
       </div>
@@ -550,171 +508,6 @@ function JudgeChallenge() {
         )}
       </div>
     </section>
-  )
-}
-
-function ResearchInterlocutor() {
-  const [lens, setLens] = useState<EssayLens>('falsify')
-  const [overlapPercent, setOverlapPercent] = useState(80)
-  const [itemCount, setItemCount] = useState(6)
-  const [commentary, setCommentary] = useState('')
-  const [modelName, setModelName] = useState('')
-  const [status, setStatus] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle')
-
-  const scenario = useMemo(
-    () => buildAssociationScenario({ overlap: overlapPercent / 100, itemCount }),
-    [overlapPercent, itemCount],
-  )
-  const recurrent = useMemo(
-    () => runRecurrent(scenario.tokens, { rotation: 'rope', writeRule: 'additive' }),
-    [scenario],
-  )
-  const output = recurrent.outputs[scenario.queryIndex]
-  const prediction = argMax(output)
-  const margin = targetMargin(output, scenario.targetIndex)
-
-  const invalidateCommentary = () => {
-    setCommentary('')
-    setModelName('')
-    setStatus('idle')
-  }
-
-  const askModel = async () => {
-    setStatus('loading')
-    setCommentary('')
-    try {
-      const query = new URLSearchParams({
-        lens,
-        overlap: String(overlapPercent),
-        load: String(itemCount),
-        scores: output.map((value) => value.toFixed(3)).join(','),
-        margin: margin.toFixed(3),
-      })
-      const response = await fetch(`/api/explain?${query}`)
-      const payload = await response.json() as { commentary?: string; error?: string; model?: string }
-      if (!response.ok || !payload.commentary) throw new Error(payload.error ?? 'No commentary returned.')
-      setCommentary(payload.commentary)
-      setModelName(payload.model ?? 'API research co-review')
-      setStatus('ready')
-    } catch (error) {
-      setCommentary(error instanceof Error ? error.message : 'The model endpoint is unavailable.')
-      setStatus('error')
-    }
-  }
-
-  return (
-    <section className="interlocutor-section" id="interrogate" aria-labelledby="interlocutor-title">
-      <div className="section-heading section-heading--split">
-        <div>
-          <EvidenceTag tone="limit">MODEL COMMENTARY · NOT EVIDENCE</EvidenceTag>
-          <p className="eyebrow">Interactive companion to the required essay</p>
-          <h2 id="interlocutor-title">Interrogate the silent state.</h2>
-        </div>
-        <div className="interlocutor-intro">
-          <p>The blog argues that latent reasoning becomes testable through controlled interventions. Pick a live trace and ask the research endpoint to challenge, connect, or teach it. Groq runs a bounded GPT-OSS 120B co-review; a trace-aware deterministic response keeps the exhibit functional if the model route is unavailable. Neither path receives your text, source code, or secrets.</p>
-          <a href="/dataforge-latent-reasoning-blog.pdf" target="_blank" rel="noreferrer">Open the required 600–800-word blog PDF ↗</a>
-        </div>
-      </div>
-
-      <div className="interlocutor-grid">
-        <article className="interlocutor-controls">
-          <span className="interlocutor-label">1 · Choose the scientific lens</span>
-          <div className="lens-buttons" role="group" aria-label="Research interlocutor lens">
-            {ESSAY_LENSES.map((option) => (
-              <button
-                type="button"
-                aria-pressed={lens === option.id}
-                onClick={() => { setLens(option.id); invalidateCommentary() }}
-                key={option.id}
-              >
-                <strong>{option.label}</strong><small>{option.note}</small>
-              </button>
-            ))}
-          </div>
-          <label className="interlocutor-slider" htmlFor="essay-overlap">
-            <span><strong>Shared key direction</strong><output>{overlapPercent}%</output></span>
-            <input
-              id="essay-overlap"
-              type="range"
-              min="0"
-              max="95"
-              step="5"
-              value={overlapPercent}
-              onChange={(event) => { setOverlapPercent(Number(event.target.value)); invalidateCommentary() }}
-            />
-          </label>
-          <label className="interlocutor-slider" htmlFor="essay-load">
-            <span><strong>Associations written</strong><output>{itemCount}</output></span>
-            <input
-              id="essay-load"
-              type="range"
-              min="1"
-              max="7"
-              step="1"
-              value={itemCount}
-              onChange={(event) => { setItemCount(Number(event.target.value)); invalidateCommentary() }}
-            />
-          </label>
-        </article>
-
-        <article className="interlocutor-observation">
-          <span className="interlocutor-label">2 · Deterministic observation</span>
-          <div className={`interlocutor-verdict ${prediction === scenario.targetIndex ? 'is-pass' : 'is-fail'}`}>
-            <span>target A → amber</span>
-            <strong>argmax → {VALUE_LABELS[prediction]}</strong>
-            <small>target margin {margin > 0 ? '+' : ''}{margin.toFixed(3)}</small>
-          </div>
-          <OutputBars output={output} targetIndex={scenario.targetIndex} />
-          <p>Computed locally with RoPE on. This trace is the evidence supplied to the co-review endpoint.</p>
-        </article>
-
-        <article className="interlocutor-response">
-          <div className="interlocutor-response__heading">
-            <span className="interlocutor-label">3 · Interpretive co-review</span>
-            <small>{modelName || 'API co-review · Groq + GPT-OSS 120B'}</small>
-          </div>
-          {status === 'idle' && <p className="interlocutor-placeholder">Generate a bounded critique of this exact trace. The response is interpretation—not a measurement, oracle, or citation.</p>}
-          {status === 'loading' && <p className="interlocutor-placeholder" aria-live="polite">Interrogating the trace…</p>}
-          {status === 'ready' && <CommentaryPoints commentary={commentary} />}
-          {status === 'error' && (
-            <div className="interlocutor-commentary is-error" aria-live="polite">{commentary}</div>
-          )}
-          <button type="button" onClick={askModel} disabled={status === 'loading'}>
-            {status === 'loading' ? 'Interrogating…' : status === 'ready' ? 'Run another co-review' : 'Interrogate this result'}
-          </button>
-          <small className="interlocutor-boundary">Only bounded, internally checked trace summaries are accepted; responses are cached. Model text is never used to calculate or validate the experiment.</small>
-        </article>
-      </div>
-
-      <div className="interlocutor-sources">
-        <span>Essay primary sources</span>
-        <SourceLink href={SOURCES.bdhCq}>BDH-CQ</SourceLink>
-        <SourceLink href={SOURCES.coconut}>Coconut</SourceLink>
-        <SourceLink href={SOURCES.recurrentDepth}>Recurrent depth</SourceLink>
-      </div>
-    </section>
-  )
-}
-
-function CommentaryPoints({ commentary }: { commentary: string }) {
-  const points = commentary
-    .split(/\n+/)
-    .map((line) => line.trim().replace(/^[-•]\s*/, '').replaceAll('**', ''))
-    .filter(Boolean)
-    .map((line) => {
-      const match = line.match(/^(Observation|Inference|Next test|Check question)\s*[:—-]?\s*(.*)$/i)
-      return match ? { label: match[1], text: match[2] } : { label: 'Co-review', text: line }
-    })
-
-  return (
-    <ol className="interlocutor-commentary" aria-live="polite">
-      {points.map((point, index) => (
-        <li key={`${point.label}-${index}`}>
-          <strong>{point.label}</strong>
-          <span>{point.text}</span>
-        </li>
-      ))}
-    </ol>
   )
 }
 
@@ -744,13 +537,13 @@ function TeachBack() {
   const feedbackTitle = captured === 3
     ? 'Mechanism captured.'
     : captured === 2
-      ? 'Almost there—one boundary is missing.'
+      ? 'Almost there, one boundary is missing.'
       : captured === 1
         ? 'You have one piece. Connect the computation to the failure.'
         : 'Start with the invariant, then name the failure.'
   return (
     <section className="teachback" aria-labelledby="teachback-title">
-      <div><p className="eyebrow">Teach it back</p><h2 id="teachback-title">What is exact—and what can still fail?</h2><p>Explain the distinction in your own words. A strong answer separates computational equivalence from memory quality.</p></div>
+      <div><p className="eyebrow">Teach it back</p><h2 id="teachback-title">What is exact, and what can still fail?</h2><p>Explain the distinction in your own words. A strong answer separates computational equivalence from memory quality.</p></div>
       <div className="teachback__input">
         <label htmlFor="teachback-answer">Your explanation</label>
         <textarea
@@ -768,7 +561,7 @@ function TeachBack() {
         >
           Compare with the mechanism
         </button>
-        <small id="teachback-hint" className="teachback__hint">Any honest attempt works—even one sentence.</small>
+        <small id="teachback-hint" className="teachback__hint">Any honest attempt works, even one sentence. Feedback is a keyword-based concept check, not semantic grading.</small>
         {compared && (
           <div className="teachback__feedback" aria-live="polite">
             <div className="teachback__score">
@@ -804,15 +597,15 @@ function EvidenceLedger() {
         <p>The point is not to make every statement sound equally certain. It is to make the boundary inspectable.</p>
       </div>
       <div className="evidence-grid">
-        <article><EvidenceTag tone="formal">FORMAL IDENTITY</EvidenceTag><h3>Parallel, recurrent, and chunk forms</h3><p>Displayed algebra; checked across deterministic fixtures to tolerance 1e−10.</p></article>
-        <article><EvidenceTag>REPRODUCED LOCALLY</EvidenceTag><h3>Collision and rewrite probes</h3><p>Computed in this repository from typed scenarios. No downloaded result table.</p></article>
-        <article><EvidenceTag tone="paper">PAPER-SUPPORTED</EvidenceTag><h3>BDH mechanism context</h3><p>Equation and implementation mapping are attributed to the paper and official code.</p></article>
-        <article><EvidenceTag tone="limit">HYPOTHESIS</EvidenceTag><h3>Full-model improvement</h3><p>Delta-style plasticity is a candidate intervention, not a claimed BDH benchmark win.</p></article>
+        <article><EvidenceTag tone="formal">Formal identity</EvidenceTag><h3>Parallel, recurrent, and chunk forms</h3><p>Displayed algebra; checked across deterministic fixtures to tolerance 1e−10.</p></article>
+        <article><EvidenceTag>Live computation</EvidenceTag><h3>Collision and rewrite probes</h3><p>Computed in this repository from typed scenarios. No downloaded result table.</p></article>
+        <article><EvidenceTag tone="paper">Paper-reported</EvidenceTag><h3>BDH mechanism context</h3><p>Equation and implementation mapping are attributed to the paper and official code.</p></article>
+        <article><EvidenceTag tone="limit">Hypothesis</EvidenceTag><h3>Full-model improvement</h3><p>Delta-style plasticity is a candidate intervention, not a claimed BDH benchmark win.</p></article>
       </div>
-      <div className="source-row">
+      <div className="source-row"><a href="/blog/">Read the separate observability essay</a><a href="/dataforge-latent-reasoning-blog.pdf">Submitted blog v1 PDF</a>
         <SourceLink href={SOURCES.bdh}>BDH paper</SourceLink>
         <SourceLink href={SOURCES.implementation}>BDH code</SourceLink>
-        <SourceLink href={SOURCES.deltaNet}>DeltaNet</SourceLink>
+        <SourceLink href={SOURCES.parallelDeltaNet}>DeltaNet 2024</SourceLink>
         <SourceLink href={SOURCES.parallelDeltaNet}>Parallel DeltaNet</SourceLink>
         <SourceLink href={SOURCES.gatedDeltaNet}>Gated DeltaNet</SourceLink>
         <SourceLink href={SOURCES.zoology}>Zoology / MQAR</SourceLink>
@@ -826,34 +619,35 @@ export default function App() {
     <>
       <a className="skip-link" href="#main">Skip to the microscope</a>
       <header className="site-header">
-        <a className="brand" href="#top" aria-label="BDH State Microscope home"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>STATE MICROSCOPE</a>
-        <nav aria-label="Primary navigation"><a href="#microscope">Microscope</a><a href="#boundary">Boundary</a><a href="#plasticity">Plasticity</a><a href="#interrogate">Essay lab</a><a href="#evidence">Evidence</a></nav>
+        <a className="brand" href="#top" aria-label="BDH State Microscope home"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>State microscope</a>
+        <nav aria-label="Primary navigation"><a href="#microscope">Microscope</a><a href="#boundary">Boundary</a><a href="#plasticity">Plasticity</a><a href="/lab/">Lab</a><a href="/blog/">Blog</a><a href="#evidence">Evidence</a></nav>
         <span className="header-note">Executable BDH mechanism</span>
       </header>
       <main id="main">
         <section className="hero" id="top">
           <div>
-            <p className="eyebrow">BDH state microscope · formal identity + controlled probes</p>
+            <p className="eyebrow">BDH state microscope, formal identity and controlled probes</p>
             <h1>Fold the attention matrix.</h1>
-            <p className="hero__lede">Watch a growing causal history collapse into one fixed-shape recurrent state—without changing the answer. Then push that state until the answer fails.</p>
-            <div className="hero__audience"><span>Built to prove</span><strong>equivalence, compression, interference, and one bounded architectural intervention</strong></div>
+            <p className="hero__lede">A fixed N × D state reproduces strictly causal linear attention exactly. In this fixture, strict recall fails when the target's overlap stops exceeding the summed overlap for every wrong value.</p>
+            <div className="hero__audience"><span>One falsifiable claim</span><strong>Exact computation does not guarantee correct recall.</strong></div>
           </div>
           <aside className="claim-card">
-            <span className="claim-card__label">the invariant</span>
-            <blockquote><code>tril(QKᵀ, −1)V</code><em> is the same computation as </em><code>oₜ = rₜSₜ₋₁</code></blockquote>
-            <a href="#microscope"><span>Open the state</span><span aria-hidden="true">↓</span></a>
+            <span className="claim-card__label">the scope</span>
+            <blockquote>For this fixture with U = I, the boundary is <code>c* = 1/m</code>, where m counts distractors carrying the most common wrong value. RoPE's correction is displayed, not hidden.</blockquote>
+            <a href="#microscope"><span>Open the state</span></a>
           </aside>
         </section>
+        <section className="audience-strip"><p><strong>For</strong> ML engineers and students who know dot products, matrix products and causal masking. BDH, RoPE and fast weights are not prerequisites.</p><p><strong>You will learn to</strong> derive the recurrence, predict the fixture's failure boundary, explain the large neuron space and distinguish revision from missing information.</p></section>
         <StateMicroscope />
         <BoundaryPlot />
         <PlasticityLab />
         <BdhBridge />
-        <ResearchInterlocutor />
+        <OneMinuteCheck />
         <JudgeChallenge />
         <TeachBack />
-        <EvidenceLedger />
+        <EvidenceLedger /><section className="lab-invitation"><h2>Take the microscope further.</h2><p>Test dimensions, random lifts, time and write rules with reproducible controls.</p><a href="/lab/">Open the lab</a><a href="/blog/">Read the separate observability essay</a></section><References />
       </main>
-      <footer className="site-footer"><span>BDH State Microscope</span><p>Mechanism before metaphor. Results before claims. Negative controls included.</p><a href="#top">Back to top ↑</a></footer>
+      <ArtifactFooter />
     </>
   )
 }

@@ -17,6 +17,7 @@ export type WriteRule = 'additive' | 'delta'
 
 export type EvaluationOptions = {
   rotation?: RotationMode
+  ropeBase?: number
   writeRule?: WriteRule
   beta?: number
   epsilon?: number
@@ -144,8 +145,9 @@ export const cloneMatrix = (matrix: Matrix): number[][] =>
 export const rotatePairwise = (
   vector: Vector,
   position: number,
-  base = 10_000,
+  base = 2 ** 16,
 ): number[] => {
+  if (!Number.isFinite(base) || base <= 1) throw new Error('RoPE base must exceed 1')
   const rotated = [...vector]
   for (let index = 0; index + 1 < vector.length; index += 2) {
     const frequency = base ** (-index / vector.length)
@@ -162,10 +164,12 @@ export const transformKey = (
   key: Vector,
   position: number,
   rotation: RotationMode,
-): number[] => (rotation === 'rope' ? rotatePairwise(key, position) : [...key])
+  base = 2 ** 16,
+): number[] => (rotation === 'rope' ? rotatePairwise(key, position, base) : [...key])
 
 const resolveOptions = (options: EvaluationOptions) => ({
   rotation: options.rotation ?? ('rope' as RotationMode),
+  ropeBase: options.ropeBase ?? 2 ** 16,
   writeRule: options.writeRule ?? ('additive' as WriteRule),
   beta: options.beta ?? 1,
   epsilon: options.epsilon ?? 1e-12,
@@ -195,13 +199,13 @@ export const runParallel = (
   options: EvaluationOptions = {},
 ): ParallelResult => {
   assertSequence(tokens)
-  const { rotation, writeRule } = resolveOptions(options)
+  const { rotation, ropeBase, writeRule } = resolveOptions(options)
   if (writeRule !== 'additive') {
     throw new Error('runParallel: the closed-form oracle is defined for additive writes')
   }
 
   const rotatedKeys = tokens.map((token, position) =>
-    transformKey(token.key, position, rotation),
+    transformKey(token.key, position, rotation, ropeBase),
   )
   const scores = tokens.map((_, queryIndex) =>
     tokens.map((__, keyIndex) =>
@@ -212,7 +216,7 @@ export const runParallel = (
   const outputs = scores.map((row) =>
     Array.from({ length: valueDimension }, (_, valueIndex) =>
       row.reduce(
-        (sum, score, tokenIndex) => sum + score * tokens[tokenIndex].value[valueIndex],
+        (sum, score, tokenIndex) => sum + (tokens[tokenIndex].role === 'association' ? score * tokens[tokenIndex].value[valueIndex] : 0),
         0,
       ),
     ),
@@ -232,14 +236,14 @@ export const runRecurrent = (
   options: EvaluationOptions = {},
 ): RecurrentResult => {
   assertSequence(tokens)
-  const { rotation, writeRule, beta, epsilon } = resolveOptions(options)
+  const { rotation, ropeBase, writeRule, beta, epsilon } = resolveOptions(options)
   const keyDimension = tokens[0].key.length
   const valueDimension = tokens[0].value.length
   let state: Matrix = zeros(keyDimension, valueDimension)
   const steps: RecurrentStep[] = []
 
   tokens.forEach((token, position) => {
-    const rotatedKey = transformKey(token.key, position, rotation)
+    const rotatedKey = transformKey(token.key, position, rotation, ropeBase)
     const stateBefore = cloneMatrix(state)
     const output = vectorTimesMatrix(rotatedKey, stateBefore)
     const delta = token.role === 'query'
@@ -282,7 +286,7 @@ export const runRecurrent = (
 export const runChunked = (
   tokens: readonly AttentionToken[],
   chunkSizes: readonly number[],
-  options: Pick<EvaluationOptions, 'rotation'> = {},
+  options: Pick<EvaluationOptions, 'rotation' | 'ropeBase'> = {},
 ): ChunkedResult => {
   assertSequence(tokens)
   if (chunkSizes.length === 0 || chunkSizes.some((size) => !Number.isInteger(size) || size <= 0)) {
@@ -293,7 +297,7 @@ export const runChunked = (
   }
 
   const rotation = options.rotation ?? 'rope'
-  const keys = tokens.map((token, position) => transformKey(token.key, position, rotation))
+  const keys = tokens.map((token, position) => transformKey(token.key, position, rotation, options.ropeBase))
   const valueDimension = tokens[0].value.length
   let state: Matrix = zeros(keys[0].length, valueDimension)
   const outputs: number[][] = []
@@ -307,6 +311,7 @@ export const runChunked = (
       const fromPriorChunks = vectorTimesMatrix(keys[queryIndex], stateIn)
       const fromThisChunk = Array<number>(valueDimension).fill(0)
       for (let keyIndex = start; keyIndex < queryIndex; keyIndex += 1) {
+        if (tokens[keyIndex].role === 'query') continue
         const score = dot(keys[queryIndex], keys[keyIndex])
         for (let valueIndex = 0; valueIndex < valueDimension; valueIndex += 1) {
           fromThisChunk[valueIndex] += score * tokens[keyIndex].value[valueIndex]

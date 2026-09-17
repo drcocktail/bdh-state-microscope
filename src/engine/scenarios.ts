@@ -106,12 +106,9 @@ export const buildAssociationScenario = ({
   })
 
   return {
-    id: safeOverlap >= 0.72 ? 'collision' : 'clean',
-    title: safeOverlap >= 0.72 ? 'Overlapping addresses' : 'Separated addresses',
-    description:
-      safeOverlap >= 0.72
-        ? 'Distractor keys share the target direction; their values accumulate in the same read.'
-        : 'The target direction remains distinct enough for the fixed state to recall amber.',
+    id: 'association-probe',
+    title: 'Controlled association probe',
+    description: 'Distractors share a chosen target component and alternate between two wrong values. The engine, not a preset label, determines recall.',
     controls: { overlap: safeOverlap, itemCount: safeCount },
     tokens,
     queryIndex: tokens.length - 1,
@@ -119,21 +116,31 @@ export const buildAssociationScenario = ({
   }
 }
 
-export const runOverlapSweep = (itemCount: number, steps = 20): SweepPoint[] =>
+/** c*=1/m belongs to this fixture with U=I, not arbitrary linear attention. */
+export const distractorMultiplicity = (itemCount: number) => Math.ceil((Math.round(clamp(itemCount, 1, 7)) - 1) / 2)
+
+export const predictedBoundary = (itemCount: number): number | null => {
+  const m = distractorMultiplicity(itemCount)
+  return m < 2 ? null : 1 / m
+}
+
+export const fixtureMargin = (overlap: number, itemCount: number) => 1 - distractorMultiplicity(itemCount) * overlap
+
+export const runOverlapSweep = (itemCount: number, steps = 19, ropeBase = 2 ** 16): SweepPoint[] =>
   Array.from({ length: steps + 1 }, (_, index) => {
     const overlap = (0.95 * index) / steps
     const scenario = buildAssociationScenario({ overlap, itemCount })
-    const result = runParallel(scenario.tokens, { rotation: 'rope' })
+    const result = runParallel(scenario.tokens, { rotation: 'rope', ropeBase })
     const output = result.outputs[scenario.queryIndex]
     return {
       overlap,
       margin: targetMargin(output, scenario.targetIndex),
       predictionIndex: argMax(output),
-      passes: argMax(output) === scenario.targetIndex,
+      passes: targetMargin(output, scenario.targetIndex) > 0,
     }
   })
 
-export const buildRewriteScenario = (): readonly AttentionToken[] => {
+export const buildRewriteScenario = (orthogonal = false): readonly AttentionToken[] => {
   const key = [1, 0, 0, 0, 0, 0, 0, 0]
   return [
     {
@@ -145,15 +152,15 @@ export const buildRewriteScenario = (): readonly AttentionToken[] => {
     },
     {
       id: 'A₂',
-      label: 'A → violet',
-      key,
+      label: orthogonal ? 'B → violet' : 'A → violet',
+      key: orthogonal ? [0, 1, 0, 0, 0, 0, 0, 0] : key,
       value: oneHot(1),
       role: 'association',
     },
     {
       id: 'Q(A)',
       label: 'query A',
-      key,
+      key: orthogonal ? [0, 1, 0, 0, 0, 0, 0, 0] : key,
       value: zeroValue(),
       role: 'query',
       expected: oneHot(1),
@@ -161,8 +168,8 @@ export const buildRewriteScenario = (): readonly AttentionToken[] => {
   ]
 }
 
-export const comparePlasticityRules = (): PlasticityComparison => {
-  const tokens = buildRewriteScenario()
+export const comparePlasticityRules = (beta = 1, orthogonal = false): PlasticityComparison => {
+  const tokens = buildRewriteScenario(orthogonal)
   const expected = oneHot(1)
   const additiveResult = runRecurrent(tokens, {
     rotation: 'identity',
@@ -171,7 +178,8 @@ export const comparePlasticityRules = (): PlasticityComparison => {
   const deltaResult = runRecurrent(tokens, {
     rotation: 'identity',
     writeRule: 'delta',
-    beta: 1,
+    beta,
+    epsilon: 0,
   })
   const queryIndex = tokens.length - 1
   const additiveOutput = additiveResult.outputs[queryIndex]
@@ -197,11 +205,15 @@ export const comparePlasticityRules = (): PlasticityComparison => {
 export const identicalKeyConflict = () => {
   const comparison = comparePlasticityRules()
   const requested = [oneHot(0), oneHot(1)] as const
+  const optimalRead = requested[0].map((v, i) => (v + requested[1][i]) / 2)
+  const optimalErrors = requested.map((target) => meanSquaredError(optimalRead, target))
   return {
     key: comparison.tokens[0].key,
     output: comparison.delta.output,
     requested,
     errors: requested.map((expected) => meanSquaredError(comparison.delta.output, expected)),
-    simultaneouslySatisfiable: false,
+    optimalRead,
+    optimalErrors,
+    simultaneouslySatisfiable: optimalErrors.every((error) => error === 0),
   }
 }
