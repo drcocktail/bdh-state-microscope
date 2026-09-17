@@ -7,39 +7,37 @@ date: 2026-09-17
 references: [cq, coconut, depth, superposition, bdh]
 ---
 
-## The missing transcript
+## How do you test reasoning you cannot read?
 
-A language model can compute without writing every intermediate thought as a token. Coconut feeds a hidden state back as the next input embedding, replacing parts of a textual reasoning chain with continuous computation [1]. Recurrent-depth models repeatedly apply a shared block, making inference depth an adjustable compute axis [2]. Neither design makes a fluent explanation a faithful trace of the computation that produced an answer.
+Suppose a machine knows that fact 0 implies fact 1, fact 1 implies fact 2, and fact 2 implies fact 3. Ask whether fact 3 follows from fact 0. The answer is yes. Now suppose the machine says no, without showing its working. Did it miss a rule, stop too early, or confuse two facts?
 
-The falsifiable idea here is narrower: with the query held fixed, controlled changes to context and compute can localize a failure without exposing intermediate state. They cannot, by themselves, uniquely identify the internal mechanism. A transcript is one instrument, not the definition of observability. The distinction matters whenever a deployed system exposes only inputs, a compute setting and a final answer.
+Reading an explanation would be useful, but it is not the only way to investigate. Keep the question fixed. Give the machine the missing rule, or let it compute for longer. The change that repairs the answer gives us a better question to ask next.
 
-## Three levels of evidence
+This is becoming a practical problem as models do more work without generating intermediate text. Coconut feeds hidden states back into the model as input embeddings [1]. Recurrent-depth models apply the same block repeatedly before producing an answer [2]. We can adjust their computation without asking them to write a longer explanation. To test these systems, we need experiments that still work when there is no transcript to read.
 
-Output evidence asks whether the answer matches an independent oracle. Intervention evidence asks which controlled change alters that answer. Mechanism evidence asks which internal state or operation caused the alteration. These are different questions. Correct outputs do not establish a circuit; a helpful intervention does not automatically establish why it helped.
+## A memory we can open
 
-BDH-CQ makes the boundary concrete. Its report separates recurrent context memory from an iterated latent workspace. Demonstrations update memory; the workspace computes an answer. The exact memory update, dimensions and workspace implementation are proprietary [3]. Outside readers can evaluate the interface, but cannot inspect those internals from the equations alone.
+The experiment below uses a small machine whose rules we know. Each fact has a pattern of active neurons. Writing an implication strengthens connections from one pattern to the next: the outer-product memory update often called Hebbian writing. Starting from fact 0, activity spreads through those connections over successive steps. We decode the active patterns to decide which facts it reached.
 
-## A useful intervention, with failures beside it
+Remove the rule from 1 to 2 and the path breaks. More steps cannot supply the missing connection. Restore that rule but stop the machine early, and the path exists in memory but activity has not reached fact 3. Here, more steps can help. Make two fact patterns overlap, and activity may reach a fact that should be unreachable. Separating their patterns addresses a different problem.
 
-Table 3 changes demonstration coverage while retaining byte-identical held-out query inputs. At ordering length eight, short-context runs score 0/24 in both tiers; a target-depth demonstration raises them to 12/24 and 13/24. At nesting depth five, scores move from 15/24 and 19/24 to 16/24 and 24/24 [3]. Context support therefore changes behavior. It does not reveal the state representation that changed.
+We check each answer against a graph search that does not use the neuron simulation. A second search checks only the rules the machine was given. The first tells us what is true; the second tells us whether the supplied information is enough. You can initially hide the neuron history, try a change, and then open it to see whether your diagnosis fits what happened.
 
-What did not work deserves equal space. Only 3/24 length-eight ordering outputs had the correct dimensions in a separate ordering diagnostic. Demonstration-defined color swap composed with relocation scored 0/72. Color swap alone scored 26/72, so the composition result cannot isolate a composition-specific defect from weak operator acquisition [3]. In two ConceptARC executions, aggregate scores matched at 374/480, while 442/480 first candidates agreed. Matching totals can conceal different individual decisions; jointly changed formats and execution settings are not a clean causal experiment [3].
+## What this has to do with BDH
 
-## Testing a sealed specimen
+The original Dragon Hatchling paper gives attention a synaptic interpretation: activity writes to a changing memory of connections, which later activity can read. Its trained-model experiments inspect meaningful synapses [5]. Our example borrows the outer-product idea, but uses hand-built fact codes rather than a trained language model.
 
-The accompanying instrument is deliberately not BDH-CQ. It stores implication edges with Hebbian outer products, advances a monotone neuron frontier and decodes only the final reachability answer. A true-world BFS oracle and a visible-context BFS oracle distinguish a missing path from a path the context actually supplies. Shared fact codes can also produce false positives.
+BDH-CQ adds a useful distinction: examples update recurrent memory, while an iterative workspace computes candidate answers. The exact updates and dimensions are proprietary [3]. We cannot open that workspace as we can open our little machine. We can, however, vary the examples or computation and measure the answers.
 
-Increase latent steps, add a missing demonstration or separate overlapping codes. A compute intervention can repair a short frontier without adding a fact. A context intervention can supply a missing path without repairing insufficient compute. A separation intervention can remove a false positive. Unsealing exposes the neuron history so each interface diagnosis can be checked against this toy's known construction.
-
-The superposition paper proves a graph-reachability construction that can represent multiple search frontiers and solve diameter-D graphs in D continuous steps [4]. Our thresholded toy illustrates simultaneous frontiers; it is not that theorem's construction. The original BDH paper studies interpretable synaptic structure, offering mechanism-level inspection in principle [5]. That property should not be transferred to proprietary BDH-CQ by association.
+The report does this with ordering tasks. At length eight, short-context runs solve none of 24 cases in either tier. Adding a demonstration at the target depth raises the scores to 12/24 and 13/24, with held-out query inputs unchanged [3]. The extra example helps, but roughly half the cases still fail. That tells us to investigate both what the examples teach and what computation remains difficult; it does not show which internal circuit changed.
 
 ## Limitations
 
-Finite observations underdetermine mechanisms. In the restricted round, coverage and compute faults give identical output traces for every allowed intervention within the displayed budget. Our exhaustive check establishes equivalence only among three enumerated hypotheses, not among all possible programs. Even a uniquely distinguished toy fault says nothing about the circuit inside a production model. Context, compute, binding and decoding can interact, violating a simple one-fault diagnosis.
+An answer can leave several explanations possible. In the restricted round below, you can observe only an unreachable control fact. All three planted faults then produce indistinguishable traces within the allowed budget. Guessing the right fault does not make the test informative.
 
-## Our judgment
+With more useful interventions, we can separate these three known programs. Other programs, or several faults acting together, may behave differently. Even the formal graph-search construction in Reasoning by Superposition is a different system from our thresholded neuron example [4]. The comparison suggests experiments; it does not establish that real models use our mechanism.
 
-Start with an independent oracle and a negative control, then change one axis at a time. Publish repaired and unrepaired cases together. Use intervention results to narrow the next experiment, not to name an invisible mechanism. Silent reasoning remains testable, but its evidence must stay at the level the instrument can support.
+Our recommendation is to start with a question whose answer you can check independently. Keep that question fixed, change one thing, and record failures as carefully as repairs. A silent model can still be tested. The difficult part is choosing a change that distinguishes the explanations you are considering.
 
 ## References
 

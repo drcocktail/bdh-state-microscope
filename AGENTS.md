@@ -4,7 +4,8 @@
 - `PRODUCTION_PROMOTION_ALLOWED = no`; `REPLACE_SUBMITTED_BLOG_PDF = no`; `ALLOW_TRAINING_RUN = no`.
 - Primary sources only for published-work claims. Put a section, equation, table, or code locator beside each claim. Verify the attached brief rather than trusting its fact sheet.
 - Every result is live engine computation, a committed-script replay with seed/provenance, or a cited paper-reported number. Never substitute expected numbers for measured results.
-- Evidence badges use sentence case: Live computation, Formal identity, Precomputed replay, Paper-reported, Teaching simplification, Hypothesis.
+- The user approved rewriting the blog and reader-facing copy on 2026-09-17. Do not put evidence-category badges or an audit ledger in the main reading flow. Preserve source records and verification behind optional methods notes.
+- For explanatory copy, use `skills/pathway-research-copywriting/SKILL.md`. Explain a concrete operation before naming its abstraction; introduce notation where it is used. Do not copy Pathway prose or adopt promotional architecture claims as established results.
 - No runtime LLM, chatbot, or server API. The application must work offline after the static assets load.
 - BDH public attention uses additive writes and RoPE; do not attribute delta rules or gates to BDH or proprietary BDH-CQ internals.
 - Do not claim model training, endorsement, universal capacity, latency savings, or cost savings. Tensor-shape accounting is not measured runtime memory.

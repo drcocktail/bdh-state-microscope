@@ -11,7 +11,7 @@ Artifact concept: exact fixed-state evaluation of strictly causal linear attenti
 Claim: exact computation does not guarantee correct recall; for this one-hot-value fixture with U=I, margin is 1 - m c, with a measured RoPE correction.
 Audience: ML engineers/students who know dot products, matrix products and causal masking.
 Objectives: derive recurrence, predict interference, explain BDH's large neuron space, distinguish revision from missing information.
-Distinct blog: PS topic 9, observability constraints in latent reasoning systems; 662 body words, at least two recent primary papers, explicit limitation and own judgment.
+Distinct blog: PS topic 9, observability constraints in latent reasoning systems; 675 body words, at least two recent primary papers, explicit limitation and own judgment. The user authorized the prose revision on 17 September 2026; the revised preview and separate v2 PDF do not alter the submitted v1 archive.
 
 Production v1 artifact: https://bdh-state-microscope.vercel.app/
 Public source: https://github.com/drcocktail/bdh-state-microscope
@@ -24,7 +24,7 @@ New candidate paths on the verified preview: `/`, `/lab/`, `/blog/`, `/blog/reas
 2. Switch separated/collision: same 24-scalar state, exact parity, different recall.
 3. Predict load-five boundary before revealing the computed sweep.
 4. Change beta and key relation; show midpoint impossibility control.
-5. Test a seeded lift and time/write variant, preserving scope labels.
+5. Test a seeded lift and time/write variant; expand its methods note for assumptions and caps.
 6. Read cited paper failures beside successes, then repair or fail to identify the sealed toy.
 
 ## Component status and reproduction

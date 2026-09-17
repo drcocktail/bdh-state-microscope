@@ -12,8 +12,8 @@ Source: original Pathway PS, all eight pages. Attached brief preferences are not
 | Recent primary literature | BDH, delta/gated/Kimi/regression/Zoology | Inline markers, exact locators, references, scoped claims |
 | Public sign-in-free source/artifact and README | Existing public repo and submitted production; new preview tested separately | Report includes anonymous route checks; no merge/promotion |
 | Reproducibility, provenance/license and AI disclosure | Exact pins, generated tables, conformance, shared seed, MIT/OFL records | Content/hash checks, docs, CI |
-| Separate 600 to 800 word blog, different topic | Topic9 observability, canonical v2 essay | 662 body words excluding headings/markers/refs; at least two recent primary papers |
-| Blog limitations and evidence versus own judgment | Proprietary/finite-hypothesis limits and explicit judgment section | Paper failures, restricted ambiguous round, scoped claim records |
+| Separate 600 to 800 word blog, different topic | Topic9 observability, canonical v2 essay | 675 body words excluding headings/markers/refs; at least two recent primary papers |
+| Blog limitations and evidence versus own judgment | Limitations section and a concluding recommendation distinct from the cited findings | Unrepaired ordering cases, restricted ambiguous round, detailed source records |
 | Blog PDF | Frozen v1 plus separate tagged v2 | Source hash; rendered readback; v1 SHA invariant |
 
 The no-runtime-LLM rule, worker/performance budget, copy style and preview freeze are adopted brief constraints, not PS prescriptions. An eight-plus-four presentation format was not found in the PS. No post-deadline editing permission is inferred. Tests verify behavior, not educational efficacy in an external learner study or hackathon acceptance.

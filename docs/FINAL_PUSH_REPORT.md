@@ -1,5 +1,7 @@
 # Final-push report
 
+Historical verification record for the pre-copy-revision candidate. The user subsequently authorized a prose rewrite on 17 September 2026. See [the copy revision report](COPY_REWRITE_REPORT.md) for current copy, PDF and deployment verification. Hashes and runtime revisions below describe that earlier candidate and are intentionally preserved.
+
 ## Outcome and switches
 
 P0 and all five P1 lab chapters are implemented, together with the separate P1 interactive blog. Work is on `final-push`; production promotion and replacing the submitted v1 PDF are forbidden. No training was authorized or run. The submitted `main` revision and the v1 PDF remain unchanged.

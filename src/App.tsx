@@ -47,16 +47,6 @@ const valueColor = (index: number) =>
 const formatNumber = (value: number, digits = 3) =>
   Math.abs(value) < 0.0005 ? '0' : value.toFixed(digits)
 
-function EvidenceTag({
-  children,
-  tone = 'live',
-}: {
-  children: ReactNode
-  tone?: 'live' | 'paper' | 'limit' | 'formal'
-}) {
-  return <span className={`evidence-tag evidence-tag--${tone}`}>{children}</span>
-}
-
 function SourceLink({ href, children }: { href: string; children: ReactNode }) {
   return (
     <a href={href} target="_blank" rel="noreferrer" className="source-link">
@@ -247,13 +237,12 @@ function StateMicroscope() {
   return (
     <section className="lab-shell" id="microscope" aria-labelledby="microscope-title">
       <div className="section-kicker">
-        <EvidenceTag>Live computation</EvidenceTag>
-        <span>One typed engine drives the oracle, recurrence, tests, and every cell below.</span>
+        <span>Both views below are calculated from the same sequence. Change a key and watch them update.</span>
       </div>
       <div className="lab-heading">
         <div>
-          <p className="eyebrow">Exact equivalence microscope</p>
-          <h2 id="microscope-title">One computation. Two forms.</h2>
+          <p className="eyebrow">Reading the memory</p>
+          <h2 id="microscope-title">Two ways to get the same answer</h2>
         </div>
         <div className="parity-certificate" aria-live="polite">
           <span>max numerical error</span><strong>{outputParity.toExponential(1)}</strong>
@@ -261,7 +250,9 @@ function StateMicroscope() {
         </div>
       </div>
 
-      <details className="formula-readout"><summary>Derive one row of the identity</summary><p>Expand the carried state Sₜ₋₁ = Σₛ&lt;ₜ rₛᵀvₛ. Then oₜ = rₜSₜ₋₁ = Σₛ&lt;ₜ (rₜ · rₛ)vₛ. This is exactly row t of the strictly lower-triangular score matrix times V. Each write is an outer product: its cell (i,j) changes by rₜ[i]vₜ[j]. Query-only tokens do not write.</p><p>Chunking splits the sum into prior-chunk state and within-chunk masked products. It changes scheduling, not the sum, when the carried state is exact.</p></details>
+      <p className="reading-intro">We store a key for A together with the value amber. Later keys store violet or mint. To retrieve A, we compare its key with every stored key and add up the matching values. Similar keys contribute to the answer too.</p>
+      <p className="reading-intro">The left view keeps those comparisons separate. The right view adds each key-value pair to one memory matrix as it arrives. Multiplying the query by that matrix gives the same weighted sum. This is linear attention, without softmax normalization.</p>
+      <details className="formula-readout"><summary>Why the two calculations agree</summary><p>Let rₛ be the key at step s, after its positional rotation, and vₛ its value. A write adds the outer product rₛᵀvₛ to memory: cell (i, j) increases by rₛ[i] × vₛ[j]. Just before step t, the matrix contains all earlier writes.</p><code>Sₜ₋₁ = Σₛ&lt;ₜ rₛᵀvₛ</code><p>Reading with the current key rₜ distributes over that sum. Each earlier value gets a weight equal to the dot product of its key with the query.</p><code>oₜ = rₜSₜ₋₁ = Σₛ&lt;ₜ (rₜ · rₛ)vₛ</code><p>The left panel computes these weights first, then multiplies by the values. The right panel combines the writes first, then reads. Only earlier steps contribute; the query itself adds nothing to memory. Chunking groups the same terms into batches and carries the accumulated matrix between them.</p></details>
       <div className="preset-row" aria-label="Microscope presets">
         {PRESETS.map((preset) => {
           const selected = preset.overlap === overlap && preset.itemCount === itemCount
@@ -283,7 +274,7 @@ function StateMicroscope() {
         <article className="computation-panel computation-panel--history">
           <div className="panel-heading">
             <span className="step-index">A</span>
-            <div><h3>Parallel causal oracle</h3><p>Materialize every permitted query-key score, then multiply by values.</p></div>
+            <div><h3>Compare with every earlier key</h3><p>Each row shows how strongly one query matches the keys before it.</p></div>
           </div>
           <CausalMatrix scores={parallel.scores} labels={labels} selected={safeStep} />
           <code className="panel-equation">O = tril(QKᵀ, −1)V</code>
@@ -292,7 +283,7 @@ function StateMicroscope() {
         <article className="computation-panel computation-panel--state">
           <div className="panel-heading">
             <span className="step-index">B</span>
-            <div><h3>Fixed recurrent state</h3><p>Read one 8 × 3 matrix, then update it with one outer product.</p></div>
+            <div><h3>Read one memory matrix</h3><p>Each stored pair changes this 8 × 3 matrix. Its shape stays the same.</p></div>
           </div>
           <MatrixHeatmap
             matrix={selectedRecord.stateBefore}
@@ -348,11 +339,12 @@ function StateMicroscope() {
         </div>
       </div>
 
-      <div className="formula-readout" aria-live="polite"><code>margin(U = I) = 1 - m c = 1 - {distractorMultiplicity(itemCount)} × {overlap.toFixed(2)} = {fixtureMargin(overlap, itemCount).toFixed(6)}</code><p>Computed margin {margin.toFixed(6)}. RoPE correction {(margin - fixtureMargin(overlap, itemCount)).toExponential(3)}. This formula is exact only for this one-hot-value fixture with U = I; ties are not strict recall.</p><label>RoPE base <select aria-label="RoPE base" value={ropeBase} onChange={e => setRopeBase(Number(e.target.value))}><option value={65536}>2^16 (official)</option><option value={10000}>10^4</option></select></label><p>The target is in the slowest-rotating pair. Parity does not depend on the base. <Citation id="code" locator="get_freqs, theta=2**16; Attention.forward" /></p><a href={window.location.href}>Permalink to this state</a></div>
+      <details className="formula-readout"><summary>Predict when amber loses</summary><p>Without positional rotation, A contributes an amber score of 1. Each other key contributes c to its stored color, where c is its overlap with A. The strongest competing color appears m times, so its score is m × c. Amber wins while 1 is greater than m × c; a tie does not count as a successful recall.</p><code>margin = 1 - m c = 1 - {distractorMultiplicity(itemCount)} × {overlap.toFixed(2)} = {fixtureMargin(overlap, itemCount).toFixed(6)}</code><p aria-live="polite">With rotation on, the actual margin is {margin.toFixed(6)}. The difference from the unrotated prediction is {(margin - fixtureMargin(overlap, itemCount)).toExponential(3)}. The formula describes these constructed keys and three color values, not arbitrary memories.</p></details>
+      <div className="rotation-controls"><label>RoPE base <select aria-label="RoPE base" value={ropeBase} onChange={e => setRopeBase(Number(e.target.value))}><option value={65536}>2^16 (official)</option><option value={10000}>10^4</option></select></label><p>RoPE rotates keys according to their position in the sequence. Here A uses the slowest-rotating coordinate pair, so the change is small. Both calculations use the same rotation. <Citation id="code" locator="get_freqs, theta=2**16; Attention.forward" /></p><a href={window.location.href}>Permalink to this state</a></div>
       <div className="control-deck control-deck--microscope">
         <div className="control-intro">
-          <p className="eyebrow">Change the substrate</p><h3>Make the fixed state collide.</h3>
-          <p>RoPE stays on. Keys, write load and base are learner-controlled.</p>
+          <p className="eyebrow">Try it</p><h3>Make the keys more alike</h3>
+          <p>Raise the overlap, or store more pairs. Watch amber compete with the other colors.</p>
         </div>
         <label className="control" htmlFor="overlap-control">
           <span><strong>Shared key direction</strong><output>{Math.round(overlap * 100)}%</output></span>
@@ -409,11 +401,10 @@ function BoundaryPlot() {
     <section className="boundary-section" id="boundary" aria-labelledby="boundary-title">
       <div className="section-heading section-heading--split">
         <div>
-          <EvidenceTag>Live computation</EvidenceTag>
-          <p className="eyebrow">Failure boundary</p>
-          <h2 id="boundary-title">Equivalence can be exact while recall is wrong.</h2>
+          <p className="eyebrow">Interference</p>
+          <h2 id="boundary-title">When does amber stop winning?</h2>
         </div>
-        <p>The two algorithms still agree at every point. What changes is the information mixed into the fixed state. This sweep is computed locally, with RoPE on and one controlled overlap variable.</p>
+        <p>Similar keys write to overlapping parts of memory. Their contributions add up when we query A. This plot increases that similarity while keeping the number of stored pairs fixed. The two methods still agree, even after they start returning the wrong color.</p>
       </div>
       <div className="boundary-card">
         <div className="boundary-controls">
@@ -443,7 +434,7 @@ function BoundaryPlot() {
         <div className="boundary-readout" aria-live="polite">
           <span>Prediction beside measurement</span>
           <strong>Predicted {prediction === null ? 'outside slider' : `${(prediction * 100).toFixed(1)}%`}, first sampled failure {boundary ? `${Math.round(boundary.overlap * 100)}%` : 'not reached'}</strong>
-          <p>At load {load}, the amber score first stops exceeding both competitors at this sampled point. It is a mechanism probe, not a trained-model benchmark.</p>
+          <p>With {load} stored pairs, this is the first sampled overlap where amber no longer beats both other colors. The plot evaluates our constructed sequence with RoPE on.</p>
         </div>
       </div>
     </section>
@@ -458,23 +449,22 @@ function PlasticityLab() {
   const conflict = useMemo(() => identicalKeyConflict(), [])
   const rowLabels = Array.from({ length: KEY_DIMENSION }, (_, i) => `k${i + 1}`)
   return <section className="plasticity-section" id="plasticity" aria-labelledby="plasticity-title">
-    <div className="section-heading section-heading--split"><div><EvidenceTag>Live computation</EvidenceTag><p className="eyebrow">Plasticity, isolated</p><h2 id="plasticity-title">Can the state revise, not merely accumulate?</h2></div><p>With U = I, change the write rule, not the state shape. These comparison rules are not BDH's public additive update. <Citation id="delta" locator="Section 2.2, delta recurrence" /></p></div>
-    <div className="formula-readout"><label htmlFor="beta-control">Correction strength β: {beta.toFixed(2)}</label><input id="beta-control" type="range" min="0" max="1" step="0.05" value={beta} onChange={e => setBeta(Number(e.target.value))} /><div className="prediction-buttons"><button aria-pressed={!orthogonal} onClick={() => setOrthogonalValue(0)}>Same key</button><button aria-pressed={orthogonal} onClick={() => setOrthogonalValue(1)}>Orthogonal key</button></div><code>{orthogonal ? `read B = β violet = ${beta.toFixed(3)} violet` : `read A = β(1 - β) amber + β violet = ${(beta * (1 - beta)).toFixed(3)} amber + ${beta.toFixed(3)} violet`}</code><p>Unit keys, two writes, zero initial state. Orthogonal keys make the delta write a β-scaled additive write.</p></div>
-    <div className="plasticity-grid">{(['additive', 'delta'] as const).map(rule => <article className={`rule-card rule-card--${rule}`} key={rule}><div className="rule-card__heading"><h3>{rule === 'additive' ? 'Additive Hebbian write' : 'Normalized delta write'}</h3><EvidenceTag>Live computation</EvidenceTag></div><code>{rule === 'additive' ? 'S ← S + kᵀv' : 'S ← S + βkᵀ(v - kS)/‖k‖²'}</code><MatrixHeatmap matrix={comparison[rule].state} title="S" rowLabels={rowLabels} columnLabels={VALUE_LABELS} compact /><OutputBars output={comparison[rule].output} targetIndex={1} /><div className="rule-verdict"><span>Computed read {orthogonal ? 'B' : 'A'}</span><strong>[{comparison[rule].output.map(v => v.toFixed(3)).join(', ')}]</strong><small>MSE to violet {comparison[rule].error.toFixed(6)}</small></div></article>)}</div>
-    <p>The masked-matrix identity above covers additive writes. Delta variants have different exact parallel forms, not that same masked matrix. <Citation id="delta" locator="Section 3, compact WY" /> <a href="/lab/#writes">Compare write rules in the lab</a>.</p>
-    <aside className="negative-control"><div><EvidenceTag tone="formal">Formal identity</EvidenceTag><h3>One identical address cannot answer two incompatible questions.</h3></div><p>The optimal common read is [{conflict.optimalRead.join(', ')}], with MSE {conflict.optimalErrors[0].toFixed(6)} to each one-hot target. The β = 1 delta read has MSE {conflict.errors[0].toFixed(6)} to amber and {conflict.errors[1].toFixed(6)} to violet. It chooses a correction, not missing information.</p><div className="negative-control__math"><code>same k implies same kS</code><span>{conflict.simultaneouslySatisfiable ? 'satisfiable' : 'not simultaneously satisfiable'}</span></div></aside>
+    <div className="section-heading section-heading--split"><div><p className="eyebrow">Updating a fact</p><h2 id="plasticity-title">What if A changes from amber to violet?</h2></div><p>Adding the new pair leaves both colors in memory. A delta write instead reads the old prediction and corrects its error. Compare the two rules below, with positional rotation switched off. Delta writing comes from DeltaNet, not the public BDH update. <Citation id="delta" locator="Section 2.2, delta recurrence" /></p></div>
+    <div className="formula-readout"><label htmlFor="beta-control">Correction strength β: {beta.toFixed(2)}</label><input id="beta-control" type="range" min="0" max="1" step="0.05" value={beta} onChange={e => setBeta(Number(e.target.value))} /><p>β controls how much of the prediction error the delta rule corrects. At 1, it replaces the old answer for this key. At 0, it writes nothing. Try giving the second pair a completely separate key instead.</p><div className="prediction-buttons"><button aria-pressed={!orthogonal} onClick={() => setOrthogonalValue(0)}>Same key</button><button aria-pressed={orthogonal} onClick={() => setOrthogonalValue(1)}>Orthogonal key</button></div><code>{orthogonal ? `read B = β violet = ${beta.toFixed(3)} violet` : `read A = β(1 - β) amber + β violet = ${(beta * (1 - beta)).toFixed(3)} amber + ${beta.toFixed(3)} violet`}</code><p>These expressions follow from two unit-length keys written into initially empty memory. With orthogonal keys, the second write has no old prediction to correct.</p></div>
+    <div className="plasticity-grid">{(['additive', 'delta'] as const).map(rule => <article className={`rule-card rule-card--${rule}`} key={rule}><div className="rule-card__heading"><h3>{rule === 'additive' ? 'Add the new pair' : 'Correct the old prediction'}</h3></div><code>{rule === 'additive' ? 'S ← S + kᵀv' : 'S ← S + βkᵀ(v - kS)/‖k‖²'}</code><MatrixHeatmap matrix={comparison[rule].state} title="S" rowLabels={rowLabels} columnLabels={VALUE_LABELS} compact /><OutputBars output={comparison[rule].output} targetIndex={1} /><div className="rule-verdict"><span>Read {orthogonal ? 'B' : 'A'} after both writes</span><strong>[{comparison[rule].output.map(v => v.toFixed(3)).join(', ')}]</strong><small>Mean squared error against violet: {comparison[rule].error.toFixed(6)}</small></div></article>)}</div>
+    <p>The earlier matrix calculation applies to additive writes. Delta rules can also run in parallel, but need a different rearrangement because each correction depends on what memory already predicts. <Citation id="delta" locator="Section 3, compact WY" /> <a href="/lab/#writes">Try the other write rules</a>.</p>
+    <aside className="negative-control"><div><h3>A correction needs to know which fact changed</h3></div><div><p>Suppose two different facts have exactly the same key, but one should return amber and the other violet. The read is kS in both cases. No write rule can make that one read return two different answers.</p><details><summary>Compare the errors</summary><p>The best compromise is [{conflict.optimalRead.join(', ')}], with mean squared error {conflict.optimalErrors[0].toFixed(6)} against each color. Full-strength delta correction chooses violet: its errors are {conflict.errors[0].toFixed(6)} against amber and {conflict.errors[1].toFixed(6)} against violet. We need distinguishable keys to preserve both facts.</p></details></div><div className="negative-control__math"><code>same k implies same kS</code><span>{conflict.simultaneouslySatisfiable ? 'Both answers are possible' : 'One read, two different targets'}</span></div></aside>
   </section>
 }
 
 function BdhBridge() {
-  return <section className="bridge-section" id="bridge" aria-labelledby="bridge-title"><div className="section-heading section-heading--split"><div><EvidenceTag tone="paper">Paper-reported</EvidenceTag><p className="eyebrow">The bridge to BDH</p><h2 id="bridge-title">Small enough to inspect. Linked to the real architecture.</h2></div><p>The microscope isolates attention products. It excludes LayerNorm, learned encoders, training and the full BDH block.</p></div>
+  return <section className="bridge-section" id="bridge" aria-labelledby="bridge-title"><div className="section-heading section-heading--split"><div><p className="eyebrow">Dragon Hatchling</p><h2 id="bridge-title">How BDH builds on this memory</h2></div><p>BDH starts from attention and gives its memory a network interpretation: activity on neurons writes to connections between them. Our small matrix lets us inspect the attention calculation; BDH adds learned transformations, normalization and layers around it. <Citation id="explainer" locator="Chapter 2, Steps 3 to 6 and Part 2.2" /></p></div>
     <div className="bridge-grid">
-      <article className="paper-equation"><h3>Two frames, one attention product</h3><code>ρₜ = (ρₜ₋₁ + vₜxₜᵀ)U</code><p>Paper Eq. 8 uses D × N. Our S has neurons as rows and value channels as columns, and rotates keys by absolute position. The frame relation is Sᵀ = ρ U^(-T). <Citation id="bdh" locator="Eq. 8" /></p><p><EvidenceTag tone="formal">Precomputed replay</EvidenceTag> The CPU conformance replay against pinned official attention passed: maximum attention error 2.66e-15; frame error 2.40e-14.</p><a href="https://github.com/drcocktail/bdh-state-microscope/blob/final-push/research/README.md">Conformance script and scope</a></article>
-      <article className="mapping-card"><h3>Why the neuron space is large</h3><p>Before RoPE, public keys and queries are the same sparse non-negative ReLU vector. The default configuration gives 8,192 neurons per head, 256 value channels and 4 heads: 8,388,608 state scalars per layer, independent of T. Here: 24. <Citation id="code" locator="BDHConfig and BDH.forward" /></p><p>Claim 7 gives order-n distinguishable facts with weak-correlation assumptions, order-√n without. Preparation and nonadversarial conditions matter. <Citation id="bdh" locator="Section 6.1, Claim 7; Appendix C.2, Claim 8" /></p><a href="/lab/#lift">Test a random lift, not a learned BDH encoder</a></article>
-      <article className="mapping-card"><h3>U changes the treatment of time</h3><p>Rotation blocks supply RoPE; diagonal damping supplies ALiBi-like decay. The paper describes damping stale context and possible selective forgetting. The public code implements RoPE only. <Citation id="bdh" locator="Definition 4; section 6.1, natural support for long context" /><Citation id="explainer" locator="Chapter 2, Step 6" /><Citation id="code" locator="Attention.forward" /></p><a href="/lab/#time">Measure the recency trade-off</a></article>
-      <article className="mapping-card"><h3>BDH-CQ is not this toy</h3><p>The report writes Sₜ = Uθ(Sₜ₋₁, Dₜ), avoiding a growing explicit KV cache, and names additive linear attention as a special case. Exact update and dimensions are proprietary. <Citation id="cq" locator="Sections 3.2 and 3.3" /></p><p>Its color-binding probe reports 96 correct outputs, 24/24 at each tested binding level. That does not reveal state capacity. <Citation id="cq" locator="Section 6.3" /></p><a href="/blog/">Explore what interface tests can establish</a></article>
-    </div><aside className="negative-control"><h3>This is not a trained checkpoint.</h3><p>A full-model improvement would require matched training, held-out benchmarks and ablations. No training or benchmark win is claimed.</p></aside>
-    <p className="why-now">Why now: Qwen3-Next and Qwen3.5 use a 3:1 Gated DeltaNet to gated-attention layout; Qwen3.5 reports 397B total parameters. Kimi Linear mixes channel-gated KDA with MLA at 3:1. <Citation id="qwen-next" /><Citation id="qwen35" /><Citation id="kimi" locator="Section 3.1 and Table 1" /> This probe illustrates interference, not a causal diagnosis of those models.</p>
+      <article className="paper-equation"><h3>Remembering connections</h3><p>When a key and value are active together, their outer product strengthens the corresponding entries in memory. In BDH's graph view, these entries are synaptic connections. The GPU formulation stores a compressed, rectangular version of that state. <Citation id="bdh" locator="Eq. 8" /><Citation id="explainer" locator="Chapter 2, Steps 4 and 5; Part 2.2" /></p><details><summary>Match our matrix to the paper</summary><code>ρₜ = (ρₜ₋₁ + vₜxₜᵀ)U</code><p>Equation 8 stores a D × N matrix and advances its positional frame with U. We store neurons along rows and rotate keys by absolute position instead. At sequence length T, the frames are related by Sᵀ = ρ U^(-T).</p><p>Our recorded CPU float64 replay against the pinned official attention implementation found a maximum attention error of 2.66e-15 and frame error of 2.40e-14. This checks attention products, not the full trained block.</p><a href="https://github.com/drcocktail/bdh-state-microscope/blob/final-push/research/README.md">Replay code and assumptions</a></details></article>
+      <article className="mapping-card"><h3>Giving keys more room</h3><p>Our eight-coordinate keys collide easily. Public BDH uses a much larger space: 8,192 neurons per head in the default configuration. Before positional rotation, keys and queries are sparse, non-negative activations produced by ReLU. <Citation id="code" locator="BDHConfig and BDH.forward" /></p><p>The paper analyzes how weakly correlated activity patterns can store more distinguishable facts. That advantage depends on the patterns and preparation; increasing the number of neurons alone is not a guarantee. <Citation id="bdh" locator="Section 6.1, Claim 7; Appendix C.2, Claim 8" /></p><a href="/lab/#lift">Try a larger sparse code</a></article>
+      <article className="mapping-card"><h3>Keeping track of time</h3><p>Positional rotation changes how a new query matches older keys. The paper also describes damping, which weakens older writes. The public implementation uses rotation, but not damping. The lab lets you compare the two and see what happens to an old fact you still need. <Citation id="bdh" locator="Definition 4; section 6.1, natural support for long context" /><Citation id="code" locator="Attention.forward" /></p><a href="/lab/#time">Try rotation and decay</a></article>
+      <article className="mapping-card"><h3>Reasoning without writing every step</h3><p>BDH-CQ separates memory of the examples from a workspace that repeatedly computes before decoding an answer. Its exact update rule and dimensions are proprietary, so the public report does not let us inspect those states directly. <Citation id="cq" locator="Sections 3.2 and 3.3" /></p><p>We can still test how answers respond to a new example or more computation. The blog explores what that tells us, and what remains hidden.</p><a href="/blog/">Read the essay and try the experiment</a></article>
+    </div><p className="why-now">DeltaNet takes another approach to interference: correcting what memory predicts. Qwen3-Next and Qwen3.5 mix Gated DeltaNet layers with gated attention; Kimi Linear mixes channel-wise delta writing with MLA attention. <Citation id="qwen-next" /><Citation id="qwen35" /><Citation id="kimi" locator="Section 3.1 and Table 1" /> The lab compares these write ideas on small examples. Testing a change inside trained BDH would require a separate, matched training experiment.</p>
   </section>
 }
 
@@ -489,9 +479,8 @@ function JudgeChallenge() {
   return (
     <section className="challenge-section" id="chunk-check" aria-labelledby="challenge-title">
       <div className="challenge-copy">
-        <EvidenceTag tone="formal">Formal identity</EvidenceTag>
-        <h2 id="challenge-title">Seven writes. Three chunks. One carried state.</h2>
-        <p>Will splitting the exact same sequence into chunks <code>[2, 3, 3]</code> change the final token outputs? Commit before revealing the computed result.</p>
+        <h2 id="challenge-title">Does batching change the answer?</h2>
+        <p>Take seven writes and a final query. Process them in batches of <code>[2, 3, 3]</code>, carrying memory from one batch to the next. Will the outputs change? Make a prediction, then check it.</p>
       </div>
       <div className="challenge-action">
         <div className="prediction-buttons" role="group" aria-label="Your prediction">
@@ -503,7 +492,7 @@ function JudgeChallenge() {
           <div className={`challenge-result ${correct ? 'is-correct' : 'is-incorrect'}`} aria-live="polite">
             <strong>{correct ? 'Correct.' : 'The computed result disagrees.'}</strong>
             <span>Maximum full-vs-chunk error: {error.toExponential(1)}.</span>
-            <p>Chunking is a scheduling choice when the incoming state is carried exactly. It does not repair the collision: compression behavior remains identical too.</p>
+            <p>Each batch starts with the memory left by the previous one. Every write is still included once, so the sums agree up to rounding. If similar keys caused a wrong answer before, batching gives the same wrong answer.</p>
           </div>
         )}
       </div>
@@ -518,32 +507,32 @@ function TeachBack() {
   const hasAttempt = answer.trim().length > 0
   const criteria = [
     {
-      label: 'Exact computation',
+      label: 'The same answer',
       met: /exact|equiv|identical|parity|same (answer|output|computation|result)/.test(normalized),
-      guidance: 'Say that the full, recurrent, and chunked routes compute the same causal result.',
+      guidance: 'The full matrix, recurrent memory and batches all add the same contributions.',
     },
     {
-      label: 'Fixed-state mechanism',
+      label: 'What memory stores',
       met: /state|matrix|recurrent|chunk|parallel|fixed|compress|history/.test(normalized),
-      guidance: 'Name the carried fixed-shape state that folds the growing attention history.',
+      guidance: 'Each key-value pair is added to a matrix whose shape stays fixed.',
     },
     {
-      label: 'Memory failure boundary',
+      label: 'Why recall can fail',
       met: /overlap|collision|interference|memory|address|wrong|fail|recall|lost|confus|quality/.test(normalized),
-      guidance: 'Explain that overlapping addresses can make every exact route return the same wrong recall.',
+      guidance: 'Similar keys also contribute when we ask for A. Their colors can outweigh amber.',
     },
   ]
   const captured = criteria.filter((criterion) => criterion.met).length
   const feedbackTitle = captured === 3
-    ? 'Mechanism captured.'
+    ? 'You connected all three parts.'
     : captured === 2
-      ? 'Almost there, one boundary is missing.'
+      ? 'One more part to connect.'
       : captured === 1
-        ? 'You have one piece. Connect the computation to the failure.'
-        : 'Start with the invariant, then name the failure.'
+        ? 'You have a starting point. What happens when the keys overlap?'
+        : 'Try explaining what both methods add up.'
   return (
     <section className="teachback" aria-labelledby="teachback-title">
-      <div><p className="eyebrow">Teach it back</p><h2 id="teachback-title">What is exact, and what can still fail?</h2><p>Explain the distinction in your own words. A strong answer separates computational equivalence from memory quality.</p></div>
+      <div><p className="eyebrow">Your explanation</p><h2 id="teachback-title">Why do both methods make the same mistake?</h2><p>Imagine explaining this to someone who has not seen the matrices. Why do the calculations agree, and why can they still return violet when we stored A as amber?</p></div>
       <div className="teachback__input">
         <label htmlFor="teachback-answer">Your explanation</label>
         <textarea
@@ -561,7 +550,7 @@ function TeachBack() {
         >
           Compare with the mechanism
         </button>
-        <small id="teachback-hint" className="teachback__hint">Any honest attempt works, even one sentence. Feedback is a keyword-based concept check, not semantic grading.</small>
+        <small id="teachback-hint" className="teachback__hint">Write a sentence or two. This checks for a few keywords, so use the notes below to review your explanation yourself.</small>
         {compared && (
           <div className="teachback__feedback" aria-live="polite">
             <div className="teachback__score">
@@ -571,7 +560,7 @@ function TeachBack() {
             <ul>
               {criteria.map((criterion) => (
                 <li className={criterion.met ? 'is-captured' : 'is-missing'} key={criterion.label}>
-                  <span>{criterion.met ? 'Captured' : 'Missing'}</span>
+                  <span>{criterion.met ? 'Mentioned' : 'Check this'}</span>
                   <strong>{criterion.label}</strong>
                   <p>{criterion.guidance}</p>
                 </li>
@@ -579,7 +568,7 @@ function TeachBack() {
             </ul>
             {captured < 3 && (
               <p className="teachback__scaffold">
-                <strong>Try this scaffold:</strong> “The full, recurrent, and chunked forms are exactly equivalent because… Yet recall can still fail when…”
+                <strong>A place to start:</strong> “Both methods add up the same values, weighted by… A wrong color can win when…”
               </p>
             )}
           </div>
@@ -589,24 +578,18 @@ function TeachBack() {
   )
 }
 
-function EvidenceLedger() {
+function MethodsNotes() {
   return (
     <section className="evidence-section" id="evidence" aria-labelledby="evidence-title">
       <div className="section-heading section-heading--split">
-        <div><p className="eyebrow">Evidence ledger</p><h2 id="evidence-title">Every claim has a type.</h2></div>
-        <p>The point is not to make every statement sound equally certain. It is to make the boundary inspectable.</p>
+        <div><h2 id="evidence-title">How to check the experiment</h2></div>
+        <p>The calculations run in your browser. The source includes separate implementations, tests and a replay against official BDH attention.</p>
       </div>
-      <div className="evidence-grid">
-        <article><EvidenceTag tone="formal">Formal identity</EvidenceTag><h3>Parallel, recurrent, and chunk forms</h3><p>Displayed algebra; checked across deterministic fixtures to tolerance 1e−10.</p></article>
-        <article><EvidenceTag>Live computation</EvidenceTag><h3>Collision and rewrite probes</h3><p>Computed in this repository from typed scenarios. No downloaded result table.</p></article>
-        <article><EvidenceTag tone="paper">Paper-reported</EvidenceTag><h3>BDH mechanism context</h3><p>Equation and implementation mapping are attributed to the paper and official code.</p></article>
-        <article><EvidenceTag tone="limit">Hypothesis</EvidenceTag><h3>Full-model improvement</h3><p>Delta-style plasticity is a candidate intervention, not a claimed BDH benchmark win.</p></article>
-      </div>
-      <div className="source-row"><a href="/blog/">Read the separate observability essay</a><a href="/dataforge-latent-reasoning-blog.pdf">Submitted blog v1 PDF</a>
+      <details className="methods-notes"><summary>Methods, assumptions and source records</summary><p>Parallel attention computes the causal score matrix directly. The recurrent implementation accumulates key-value outer products; the chunked implementation combines earlier memory with each batch's local writes. Tests compare their outputs and states with a tolerance of 1e-10, including both positional bases and randomized sequences.</p><p>The color experiments use constructed keys and one-hot values. They explain how overlap affects this memory, rather than measuring a trained model. Delta writing is a comparison from the DeltaNet literature. Improving trained BDH with it would need matched training, held-out evaluation and ablations.</p><a href="https://github.com/drcocktail/bdh-state-microscope/blob/final-push/research/README.md">Official attention replay</a><a href="/blog/claims.json">Detailed source records</a></details>
+      <div className="source-row"><a href="/blog/">Reasoning without a transcript</a>
         <SourceLink href={SOURCES.bdh}>BDH paper</SourceLink>
         <SourceLink href={SOURCES.implementation}>BDH code</SourceLink>
-        <SourceLink href={SOURCES.parallelDeltaNet}>DeltaNet 2024</SourceLink>
-        <SourceLink href={SOURCES.parallelDeltaNet}>Parallel DeltaNet</SourceLink>
+        <SourceLink href={SOURCES.parallelDeltaNet}>DeltaNet</SourceLink>
         <SourceLink href={SOURCES.gatedDeltaNet}>Gated DeltaNet</SourceLink>
         <SourceLink href={SOURCES.zoology}>Zoology / MQAR</SourceLink>
       </div>
@@ -620,24 +603,24 @@ export default function App() {
       <a className="skip-link" href="#main">Skip to the microscope</a>
       <header className="site-header">
         <a className="brand" href="#top" aria-label="BDH State Microscope home"><span className="brand-mark" aria-hidden="true"><i /><i /><i /></span>State microscope</a>
-        <nav aria-label="Primary navigation"><a href="#microscope">Microscope</a><a href="#boundary">Boundary</a><a href="#plasticity">Plasticity</a><a href="/lab/">Lab</a><a href="/blog/">Blog</a><a href="#evidence">Evidence</a></nav>
-        <span className="header-note">Executable BDH mechanism</span>
+        <nav aria-label="Primary navigation"><a href="#microscope">Microscope</a><a href="#boundary">Interference</a><a href="#plasticity">Updates</a><a href="/lab/">Lab</a><a href="/blog/">Blog</a><a href="#evidence">Methods</a></nav>
+        <span className="header-note">An interactive guide to memory</span>
       </header>
       <main id="main">
         <section className="hero" id="top">
           <div>
-            <p className="eyebrow">BDH state microscope, formal identity and controlled probes</p>
-            <h1>Fold the attention matrix.</h1>
-            <p className="hero__lede">A fixed N × D state reproduces strictly causal linear attention exactly. In this fixture, strict recall fails when the target's overlap stops exceeding the summed overlap for every wrong value.</p>
-            <div className="hero__audience"><span>One falsifiable claim</span><strong>Exact computation does not guarantee correct recall.</strong></div>
+            <p className="eyebrow">BDH state microscope</p>
+            <h1>What does attention remember?</h1>
+            <p className="hero__lede">Linear attention can combine a whole sequence of key-value pairs into one fixed-size matrix. We can read that matrix exactly and still retrieve the wrong value. Let's see how.</p>
+            <div className="hero__audience"><span>Start here</span><strong>Compare the two views, then make the keys more alike.</strong></div>
           </div>
           <aside className="claim-card">
-            <span className="claim-card__label">the scope</span>
-            <blockquote>For this fixture with U = I, the boundary is <code>c* = 1/m</code>, where m counts distractors carrying the most common wrong value. RoPE's correction is displayed, not hidden.</blockquote>
-            <a href="#microscope"><span>Open the state</span></a>
+            <span className="claim-card__label">A small memory experiment</span>
+            <blockquote>Store A as amber. Add a few similar keys. Ask for A again. Why does the answer turn violet?</blockquote>
+            <a href="#microscope"><span>Try the experiment</span></a>
           </aside>
         </section>
-        <section className="audience-strip"><p><strong>For</strong> ML engineers and students who know dot products, matrix products and causal masking. BDH, RoPE and fast weights are not prerequisites.</p><p><strong>You will learn to</strong> derive the recurrence, predict the fixture's failure boundary, explain the large neuron space and distinguish revision from missing information.</p></section>
+        <section className="audience-strip"><p>You will need dot products and matrix multiplication. We explain the memory update and positional rotation as we go; no prior knowledge of BDH is required.</p></section>
         <StateMicroscope />
         <BoundaryPlot />
         <PlasticityLab />
@@ -645,7 +628,7 @@ export default function App() {
         <OneMinuteCheck />
         <JudgeChallenge />
         <TeachBack />
-        <EvidenceLedger /><section className="lab-invitation"><h2>Take the microscope further.</h2><p>Test dimensions, random lifts, time and write rules with reproducible controls.</p><a href="/lab/">Open the lab</a><a href="/blog/">Read the separate observability essay</a></section><References />
+        <MethodsNotes /><section className="lab-invitation"><h2>What would you change in this memory?</h2><p>Try more dimensions, sparser codes, decay or a different write rule. Each lab experiment changes one part of the design.</p><a href="/lab/">Open the lab</a><a href="/blog/">Reasoning without a transcript</a></section><References />
       </main>
       <ArtifactFooter />
     </>

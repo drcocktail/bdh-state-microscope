@@ -24,9 +24,9 @@ export function SynthesisMap() {
   ]
   return <figure className="synthesis-map"><div className="table-scroll"><svg viewBox="0 0 1050 420" aria-labelledby="synthesis-map-title synthesis-map-description">
     <title id="synthesis-map-title">Our synthesis: latent reasoning, compute and observability</title>
-    <desc id="synthesis-map-description">Directed conceptual relations with source markers. These are not claims of implementation ancestry. The six relations are described in the reading notes below.</desc>
+    <desc id="synthesis-map-description">Six connections between research ideas, with reference numbers. The notes below explain each connection.</desc>
     <defs><marker id="synthesis-arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto"><path d="M0 0L8 4L0 8Z" fill="#546876"/></marker></defs>
     {edges.map(({from,to,relation,ids})=>{const a=nodes[from],b=nodes[to],mid=(a.x+220+b.x)/2;return <g key={`${from}-${to}`}><path d={`M${a.x+220} ${a.y+40}H${b.x-5}`} fill="none" stroke="#546876" strokeWidth="2" markerEnd="url(#synthesis-arrow)"/><text x={mid} y={a.y-13} textAnchor="middle" className="map-relation">{relation}</text><text x={mid} y={a.y+4} textAnchor="middle" className="map-relation">{ids.map(id=>`[I${sources.findIndex(s=>s.id===id)+1}]`).join(' ')}</text></g>})}
     {nodes.map(({x,y,label,detail})=><g key={label}><rect x={x} y={y+12} width="220" height="76" rx="3" fill="white" stroke="#70828c"/><text x={x+14} y={y+43} className="map-node">{label}</text><text x={x+14} y={y+65} className="map-detail">{detail}</text></g>)}
-  </svg></div><figcaption>Our synthesis, not model ancestry or a causal mechanism claim. Each edge names a relation and its instrument-source markers. Scroll the diagram on small screens; the reading notes below carry the same relations and keyboard-focusable citations.</figcaption></figure>
+  </svg></div><figcaption>The links connect research ideas rather than model implementations. Reference numbers identify the papers behind each connection. On small screens, scroll the diagram or read the notes below.</figcaption></figure>
 }

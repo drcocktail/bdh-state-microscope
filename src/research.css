@@ -17,6 +17,20 @@
 .formula-readout label { display: inline-block; margin-right: 1rem; }
 .formula-readout input { display: block; width: min(100%,36rem); margin: 1rem 0; }
 .formula-readout select { margin: .5rem; }
+.reading-intro { max-width: 78ch; font-size: 1rem; line-height: 1.85; color: #dce2eb; margin: 1.2rem 0; }
+.rotation-controls { max-width: 78ch; margin: 1.5rem 0; font-size: .85rem; line-height: 1.75; color: #dce2eb; }
+.rotation-controls select { font: inherit; margin: .5rem; }
+.rotation-controls .citation > a { color: #c2b4ff; }
+.methods-notes { padding: 1.2rem 0; border-top: 1px solid var(--line); line-height: 1.8; font-size: .9rem; }
+.methods-notes summary,.related-reading > summary { cursor: pointer; font-weight: 650; padding: .4rem 0; }
+.methods-notes > a { display: inline-block; margin: .5rem 1.5rem .5rem 0; text-underline-offset: 4px; }
+.methods-notes p { max-width: 78ch; }
+.hero h1 { font-size: clamp(4.1rem,8.2vw,8rem); line-height: .95; letter-spacing: -.055em; }
+.hero__audience { flex-wrap: wrap; }
+.hero__audience span { text-transform: none; letter-spacing: .02em; }
+.claim-card blockquote { font-size: clamp(1.5rem,2.2vw,2.1rem); line-height: 1.3; }
+.negative-control details { margin-top: 1rem; }
+.related-reading { margin: 3rem 0; border-top: 1px solid #bac0b2; padding-top: 1.2rem; }
 .eyebrow,.evidence-tag,.section-kicker,.boundary-controls > span,.claim-card__label { text-transform: none; letter-spacing: .02em; }
 .evidence-tag { white-space: normal; }
 .paper-equation .evidence-tag--formal { color: #245f46; }

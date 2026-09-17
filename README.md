@@ -6,13 +6,13 @@ A deterministic, sign-in-free teaching instrument for the Pathway PS. Independen
 
 A fixed N × D additive state reproduces strictly causal dot-product attention exactly. Exact execution does not guarantee correct recall. In the guided one-hot-value fixture with U=I, margin = 1 - m c, where m is the largest multiplicity of a wrong value. RoPE's correction is computed beside that formula. Ties are not strict recall. This is not a universal recall condition or a trained-model result.
 
-The original eight-page PS was checked independently against the attached final-push proposal. See [scope audit](docs/FINAL_PUSH_SCOPE_AUDIT.md). The PS allows APIs; their removal is an adopted brief constraint and repairs an interpretation endpoint that accepted arithmetic-consistent but fabricated scores.
+The original eight-page PS was checked independently against the attached final-push proposal. See [scope audit](docs/FINAL_PUSH_SCOPE_AUDIT.md). The PS allows APIs; their removal is an adopted brief constraint and repairs an interpretation endpoint that accepted arithmetic-consistent but fabricated scores. The subsequent user-authorized copy revision explains the same computations through concrete examples, with methods and source records outside the main reading flow. See [copy revision report](docs/COPY_REWRITE_REPORT.md).
 
 ## Audience and objectives
 
 For ML engineers and students who know dot products, matrix products and causal masking. Prior BDH, RoPE and fast-weight knowledge is not required.
 
-Learn to derive a masked row from a recurrent sum, inspect read-before-write state, predict the fixture's boundary, explain why BDH uses a large sparse neuron space, and distinguish write revision from missing information. The separate essay teaches the distinction between output, intervention and mechanism evidence.
+Learn to derive a masked row from a recurrent sum, inspect read-before-write state, predict the fixture's boundary, explain why BDH uses a large sparse neuron space, and distinguish write revision from missing information. The separate 675-word essay follows a small rule graph to explain how experiments can distinguish missing information from insufficient computation, and when they cannot.
 
 ## Three static entries
 
@@ -37,6 +37,7 @@ src/engine/lab.worker.ts    Cancellable capped capacity sweeps
 src/latent/system.ts       Toy neuron system, BFS and finite identifiability
 src/content/sources.ts     Primary source URLs and locators
 content/blog/*.md           Canonical v2 essay imported by webpage
+skills/pathway-research-copywriting/  Reusable source-grounded explanatory copy skill
 src/{App,Lab,Blog}.tsx       Control state and semantic views, separate entries
 scripts/                   Generated results, content/link gates, PDF
 research/                  Official attention conformance and replay output

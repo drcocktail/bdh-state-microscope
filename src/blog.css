@@ -46,6 +46,10 @@
 .blog-provenance a { margin-right: 1.5rem; text-decoration: underline; }
 .blog-page .artifact-footer { background: #dae5eb; }
 .print-url { display: none; }
+@media print {
+  .related-reading { display: none !important; }
+  .essay-heading .essay-claim { font-size: 12px; }
+}
 .instrument-references { font-size: .85rem; line-height: 1.8; margin: 2rem 0; }
 .instrument-references li { margin: .8rem 0; }
 @media print { .instrument-references { display: none; } }

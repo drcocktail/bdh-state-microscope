@@ -7,6 +7,7 @@ for(const width of [390,1440])for(const route of ['/','/lab/','/blog/'])test(`la
   await page.setViewportSize({width,height:900})
   const errors:string[]=[];page.on('pageerror',error=>errors.push(error.message));page.on('console',message=>{if(message.type()==='error')errors.push(message.text())})
   await page.goto(route);await expect(page.locator('h1')).toBeVisible()
+  await expect(page.locator('.evidence-tag')).toHaveCount(0)
   if(route==='/lab/')await expect(page.locator('#lift .worker-result')).toContainText('Completed',{timeout:10000})
   expect(await page.evaluate(()=>document.documentElement.scrollWidth<=window.innerWidth)).toBe(true)
   expect(errors).toEqual([])
@@ -38,6 +39,8 @@ test('fixed-seed worker and time parity in every mode',async({page})=>{
 })
 test('sealed specimen, fault round and explicit ambiguity',async({page})=>{
   await page.goto('/blog/?roundSeed=17&shared=8&codeK=4')
+  await expect(page.locator('.blog-provenance')).not.toHaveAttribute('open','')
+  await page.locator('.blog-provenance summary').click()
   await expect(page.locator('#markdown-hash')).toHaveText(createHash('sha256').update(readFileSync('content/blog/reasoning-without-a-transcript.md')).digest('hex'))
   await expect(page.getByLabel('Shared neurons')).toHaveValue('4')
   await page.getByLabel('Active neurons k').fill('2')

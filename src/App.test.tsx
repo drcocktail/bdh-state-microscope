@@ -41,9 +41,9 @@ describe('BDH State Microscope learning journey', () => {
     )
     expect(compare).toBeEnabled()
     await user.click(compare)
-    expect(screen.getByText('Mechanism captured.')).toBeInTheDocument()
+    expect(screen.getByText('You connected all three parts.')).toBeInTheDocument()
     expect(screen.getByText('3/3 concepts captured')).toBeInTheDocument()
-    expect(screen.getAllByText('Captured')).toHaveLength(3)
+    expect(screen.getAllByText('Mentioned')).toHaveLength(3)
   })
 
   it('turns a short weak teach-back attempt into actionable feedback', async () => {
@@ -56,8 +56,8 @@ describe('BDH State Microscope learning journey', () => {
     expect(compare).toBeEnabled()
     await user.click(compare)
     expect(screen.getByText('0/3 concepts captured')).toBeInTheDocument()
-    expect(screen.getByText(/Try this scaffold/)).toBeInTheDocument()
-    expect(screen.getAllByText('Missing')).toHaveLength(3)
+    expect(screen.getByText(/A place to start/)).toBeInTheDocument()
+    expect(screen.getAllByText('Check this')).toHaveLength(3)
   })
 
   it('lets the reader inspect a pre-write token state', async () => {

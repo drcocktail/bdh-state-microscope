@@ -1,5 +1,13 @@
 # Changelog
 
+## Reader-facing copy revision, 17 September 2026
+
+- Researched Pathway's written architecture corpus and separated technical explanation from launch/newsletter genres.
+- Added a reusable Pathway research copywriting skill, source notes and a user-requested Luna editorial pass.
+- Rewrote the guided page, lab introductions and 675-word essay around concrete memory and graph examples.
+- Removed bordered evidence badges and the visible taxonomy ledger; kept sources, derivations and replay in optional methods notes.
+- Regenerated the separate v2 PDF from canonical prose. Engine algorithms, seeds, submitted production and v1 PDF remain unchanged.
+
 ## 1.1.0, final-push candidate, 17 September 2026
 
 - Independently audited Claude's brief against the original PS and primary sources.

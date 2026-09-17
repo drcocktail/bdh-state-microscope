@@ -1,11 +1,5 @@
 import { sources, type SourceId } from '../content/sources'
 
-export type EvidenceType = 'Live computation' | 'Formal identity' | 'Precomputed replay' | 'Paper-reported' | 'Teaching simplification' | 'Hypothesis'
-
-export function EvidenceBadge({ type }: { type: EvidenceType }) {
-  return <span className="evidence-tag">{type}</span>
-}
-
 /** The locator is visible on keyboard focus as well as hover. */
 export function Citation({ id, locator, number, namespace = '' }: { id: SourceId; locator?: string; number?: number; namespace?: string }) {
   const index = sources.findIndex((source) => source.id === id)
