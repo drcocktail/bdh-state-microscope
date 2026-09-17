@@ -4,6 +4,8 @@
 
 P0 and all five P1 lab chapters are implemented, together with the separate P1 interactive blog. Work is on `final-push`; production promotion and replacing the submitted v1 PDF are forbidden. No training was authorized or run. The submitted `main` revision and the v1 PDF remain unchanged.
 
+Deployment method override: the user explicitly approved CLI preview deployment after Git repository linking failed. Authentication was already available; no new account permission or production promotion is implied.
+
 The original eight-page PS was independently checked against the attached brief and primary sources. See FINAL_PUSH_SCOPE_AUDIT.md. The brief is a proposal, not organizer authority. Post-deadline edit permission and an eight-plus-four final presentation format are not established by the PS.
 
 ## Changes
@@ -37,7 +39,7 @@ The original eight-page PS was independently checked against the attached brief 
 - Strict TypeScript and all three Vite entries: passed.
 - Unit/property tests: 40 across 4 files. Includes 240 seeded sequences, two bases (480 evaluations), random N/D/T and chunk schedules; 128 time combinations; beta/orthogonality; loads 1 to 7; affine products; independent brute-force fault comparison.
 - Browser tests: 15. Mobile 390 px and desktop 1440 px, all three pages, no page/console errors or horizontal overflow; presets, two prediction flows, teach-back, offline operation, seeded worker/lift/time, sealed/restricted rounds, keyboard source popover, URL state, PDF/routes/hash and WCAG 2 A/AA plus 2.1 AA axe checks. Automated checks do not establish universal accessibility.
-- Guided input-to-paint, two animation frames: the completed 15-test run measured 24.0 to 33.4 ms, below the adopted 100 ms gate. This is Chromium on this machine, not trained-model inference throughput.
+- Guided input-to-paint, two animation frames: the completed 15-test run measured 24.3 to 33.8 ms, below the adopted 100 ms gate. This is Chromium on this machine, not trained-model inference throughput.
 - Default worker sweeps completed within one second in browser checks; UI shows elapsed time. No universal latency guarantee or hardware saving is claimed.
 - Exact-state observation caching preserves every enumerated sequence in finite identifiability. The 364-sequence, five-intervention check fell from approximately 1675 ms to 13 ms in an isolated local tsx timing; this is an implementation diagnostic, not a model benchmark. Independent uncached trace comparisons check both seeds 17/18, budgets 0/1/3/5 and full/restricted menus.
 - Canonical essay: 662 body words excluding headings, citations and references. At least two recent primary references, BDH mention, limitation and judgment sections.
@@ -80,20 +82,22 @@ Submitted production: https://bdh-state-microscope.vercel.app/
 Public source: https://github.com/drcocktail/bdh-state-microscope/tree/final-push
 Annotated freeze tag: https://github.com/drcocktail/bdh-state-microscope/releases/tag/v1-submission
 
-Preview deployment is pending repository access. The Vercel project has `link: null`. The CLI Git connect and authenticated project-link endpoint failed; the latter returns HTTP400 repository not found while GitHub confirms the public repository. User chose to grant Vercel repository access; no CLI-method substitution was approved. No production deployment/promotion or merge was performed.
+Git deployment failed: the Vercel project has `link: null`; the CLI Git connect and authenticated project-link endpoint returned repository access errors while GitHub confirmed the public repository. The user subsequently approved the CLI fallback for preview-only deployment. No production deployment/promotion or merge was performed.
 
-PR and CI URLs will be recorded after branch publication. Local route checks are not represented as Vercel preview checks.
+Unmerged PR: https://github.com/drcocktail/bdh-state-microscope/pull/1
+
+Hosted verification passed at implementation revision `8cddd79f58832c075dd903f1c05a3fbef25f373d`: https://github.com/drcocktail/bdh-state-microscope/actions/runs/35238844620. Frozen install, typecheck, 40 tests, all three-entry build, content checks, 15 browser checks, links, generated results and browser evidence upload passed. A subsequent discrete-URL-control guard is locally verified and will be rechecked in CI. Local route checks are not represented as Vercel preview checks.
 
 ## Skipped stretch items and open risks
 
 P2 training disabled. Tokens-versus-information, N×N synapse chapter, full BDH checkpoint, optimized WY kernel, presentation mode, embed and backup video are deferred, not exposed as placeholders. No paid API or GPU task was started.
 
-Still required for deployment completion: Vercel repository grant, Git preview deployment, anonymous preview suite and confirmed green hosted CI. No submission form was edited. External learner efficacy and full-model improvement are untested. Browser metrics vary by machine. Capacity caps may censor results. Finite diagnostics cannot rule out arbitrary or interacting mechanisms.
+Still required for deployment completion: CLI preview deployment, anonymous preview suite and confirmed green CI on the final review revision. No submission form was edited. External learner efficacy and full-model improvement are untested. Browser metrics vary by machine. Capacity caps may censor results. Finite diagnostics cannot rule out arbitrary or interacting mechanisms.
 
 ## Manual actions
 
 1. Delete `GROQ_API_KEY` from Vercel project settings yourself. Shared credentials should also be rotated by their owner; no key is repeated or shipped here.
-2. Complete the Vercel GitHub repository access grant for this exact repository.
+2. GitHub repository integration remains unconnected; CLI preview is the explicitly approved fallback. Future automatic Git deployments need the exact-repository grant.
 3. Review the source/math and confirm organizer permission before changing the freeze switches, merging, promoting production, replacing v1 PDF or editing a submission form.
 4. Use the unmerged preview for review until permission is explicit.
 

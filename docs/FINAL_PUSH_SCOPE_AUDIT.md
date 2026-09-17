@@ -12,6 +12,8 @@ The PS does not prescribe an eight-minute final, prohibit all LLM calls, prescri
 
 Post-deadline editing permission is not in this PDF. The supplied switches therefore govern: preserve production and the v1 PDF, publish only a preview, and open an unmerged PR. No training is authorized.
 
+Deployment override: after Git repository linking failed, the user explicitly approved Vercel CLI preview deployment on 17 September 2026. Only the deployment method changes; production and v1 freeze switches remain `no`.
+
 ## Mathematical and scope repairs
 
 1. The `1/m` boundary is a closed form for this constructed one-hot-value fixture without rotation. With RoPE, use the computed weighted cosines and display the correction. Ties are not a strict recall success even when argmax chooses the first class.

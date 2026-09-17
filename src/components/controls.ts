@@ -5,6 +5,8 @@ export function readNumber(key: string, fallback: number, min: number, max: numb
   const value = raw === null ? fallback : Number(raw)
   const safe = Number.isFinite(value) ? Math.min(max, Math.max(min, value)) : fallback
   if (/^base$|Base$/.test(key)) return safe === 10000 ? 10000 : 65536
+  if (/^(dim|lift)N$/.test(key)) return [4,8,16,32].includes(safe) ? safe : fallback
+  if (key === 'bytes') return safe === 4 ? 4 : 2
   return /overlap|beta|gamma|alpha|activity/i.test(key) ? safe : Math.round(safe)
 }
 

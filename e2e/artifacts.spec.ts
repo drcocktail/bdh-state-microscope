@@ -23,7 +23,9 @@ test('guided predictions, controls, teachback and offline engine',async({page,co
   await page.getByRole('button',{name:/Collision/}).click();await expect(page.getByText('recall breaks',{exact:true})).toBeVisible()
 })
 test('fixed-seed worker and time parity in every mode',async({page})=>{
-  await page.goto('/lab/?liftSeed=17&neurons=1024&activity=.05&liftT=128&liftC=8')
+  await page.goto('/lab/?dimN=9&bytes=3&liftSeed=17&neurons=1024&activity=.05&liftT=128&liftC=8')
+  await expect(page.getByLabel('Key dimension N',{exact:true})).toHaveValue('16')
+  await expect(page.getByLabel('Bytes per scalar')).toHaveValue('2')
   await expect(page.locator('#lift .worker-result')).toContainText('Completed',{timeout:10000})
   const rows=page.locator('#lift tbody tr'),raw=Number(await rows.nth(0).locator('td').first().innerText()),lift=Number((await rows.nth(1).locator('td').first().innerText()).split(' ')[0])
   expect(raw).toBeLessThanOrEqual(18);expect(lift).toBeGreaterThan(raw)
