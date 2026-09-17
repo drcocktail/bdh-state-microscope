@@ -1,5 +1,7 @@
 # BDH State Microscope — Product Specification
 
+> Archived v1 planning document, not the current candidate contract. See FINAL_PUSH_SCOPE_AUDIT.md and ENGINE_API.md for current scope.
+
 ## Product decision
 
 **Concept:** exact causal linear-attention equivalence, followed by a controlled state-quality investigation.

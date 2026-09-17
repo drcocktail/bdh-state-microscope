@@ -1,0 +1,11 @@
+cff-version: 1.2.0
+message: "Please cite the repository version and preserve its evidence boundaries."
+type: software
+title: "BDH State Microscope"
+authors:
+  - name: "BDH State Microscope contributors"
+version: 1.1.0
+date-released: 2026-09-17
+url: "https://github.com/drcocktail/bdh-state-microscope"
+repository-code: "https://github.com/drcocktail/bdh-state-microscope"
+license: MIT

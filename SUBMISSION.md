@@ -1,59 +1,42 @@
-# DataForge 2026 — Pathway Track Submission
+# Pathway track submission record
 
-## Deliverables
+## Freeze
 
-- **Project:** BDH State Microscope
-- **Interactive artifact:** https://bdh-state-microscope.vercel.app
-- **Public source:** https://github.com/drcocktail/bdh-state-microscope
-- **Blog PDF:** https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf
-- **License:** MIT
+This is a v2 candidate, not a replacement submission. The adopted switches prohibit production promotion and replacing the submitted blog PDF. Production and `main` remain the submitted v1 revision. An unmerged `final-push` PR and preview are the review deliverables. Organizer permission to edit after the deadline is not established by the PS.
 
-All three public endpoints were anonymously checked on 8 September 2026. The artifact and PDF returned HTTP 200 without a Vercel or application sign-in. The downloaded blog matched the versioned PDF at SHA-256 `2ef8a487f652f4145d463877de5e0f54993301ae8665541bbec2071e668a32b9`.
+## Form-ready content if changes are authorized
 
-## One-sentence claim
+Project: BDH State Microscope.
+Artifact concept: exact fixed-state evaluation of strictly causal linear attention, with a fixture-specific interference boundary.
+Claim: exact computation does not guarantee correct recall; for this one-hot-value fixture with U=I, margin is 1 - m c, with a measured RoPE correction.
+Audience: ML engineers/students who know dot products, matrix products and causal masking.
+Objectives: derive recurrence, predict interference, explain BDH's large neuron space, distinguish revision from missing information.
+Distinct blog: PS topic 9, observability constraints in latent reasoning systems; 662 body words, at least two recent primary papers, explicit limitation and own judgment.
 
-BDH-style strictly causal linear attention can be evaluated exactly as a full attention matrix, a fixed-shape recurrent state, or state-carrying chunks—yet all three can return the same wrong recall when overlapping associations interfere inside that state.
+Production v1 artifact: https://bdh-state-microscope.vercel.app/
+Public source: https://github.com/drcocktail/bdh-state-microscope
+Submitted v1 PDF: https://bdh-state-microscope.vercel.app/dataforge-latent-reasoning-blog.pdf
+New candidate paths on the verified preview: `/`, `/lab/`, `/blog/`, `/blog/reasoning-without-a-transcript-v2.pdf`. Preview/PR URLs are in `docs/FINAL_PUSH_REPORT.md`.
 
-## Copy-ready short description
+## Demonstration route
 
-BDH State Microscope is an executable mechanism exhibit, not a model dashboard. It independently computes the same strictly causal attention sequence through a full matrix, token-by-token recurrence, and arbitrary state-carrying chunks, then certifies their numerical parity live. Learners inspect every pre-write state, change key overlap and association load, watch a recall margin cross zero, compare additive accumulation with a normalized prediction-error write, and confront an identical-key negative control that the intervention cannot solve. A separate interactive essay companion submits the chosen numeric trace to a bounded server endpoint for an evidence-labelled co-review from Groq-hosted GPT-OSS 120B, with a deterministic trace-aware response otherwise. The required 600–800-word PDF covers observability constraints in latent reasoning and cites BDH-CQ, Coconut, and recurrent-depth primary work.
+1. Inspect a pre-write state and derive the matrix/state equality.
+2. Switch separated/collision: same 24-scalar state, exact parity, different recall.
+3. Predict load-five boundary before revealing the computed sweep.
+4. Change beta and key relation; show midpoint impossibility control.
+5. Test a seeded lift and time/write variant, preserving scope labels.
+6. Read cited paper failures beside successes, then repair or fail to identify the sealed toy.
 
-## What is genuinely executed
+## Component status and reproduction
 
-- Independent parallel, recurrent, and chunked evaluators.
-- Strict causal read-before-write semantics.
-- RoPE-enabled synthetic association scenarios.
-- A 39-point overlap sweep at the selected load.
-- Additive and normalized-delta write rules on the same controlled correction.
-- A formal identical-address impossibility check.
-- Bounded server-side co-review of a three-score trace; the actual responder is named in the interface.
+All experiment values are live synthetic computations. Conformance is a pinned-script CPU replay. Paper numbers are attributed; the blog PDF is static; only sweep presentation animates. No animation supplies evidence. Teach-back is a transparent keyword check. See README, generated results, engine contract, source/license record and AI disclosure.
 
-No prerecorded result table, trained checkpoint, judge model, external dataset, or hidden API is used to compute any experimental verdict.
+Run frozen install, `pnpm check`, `pnpm results` and official conformance instructions. No API keys, runtime model, weights, external dataset or GPU is needed.
 
-## Reproduced headline results
+## Disclosure
 
-- Full versus recurrent maximum output error: `2.2e-16` in the default collision fixture.
-- Full versus chunked maximum output error: `0.0` in the same fixture.
-- Deterministic parity grid: `35/35` overlap-by-load scenarios below `1e-10` tolerance.
-- Six-write collision preset: output approximately `[1.00, 2.46, 1.64]`; violet defeats target amber.
-- Six-write separated preset: target margin approximately `+0.76`; amber remains strongest.
-- First sampled six-write failure: `35%` shared key direction in the declared 39-point sweep.
-- Same-key correction: additive output `[1, 1, 0]`; normalized-delta output approximately `[0, 1, 0]` in the isolated fixture.
+Codex implemented/revised code, docs and verification. Claude supplied the final-push audit/research brief. The human team still must review and defend all claims and licenses; automated checks are not proof of human independent verification. No trained BDH or BDH-CQ reproduction, endorsement, universal capacity or hardware savings is claimed.
 
-## BDH connection and boundary
+## Manual actions
 
-The exhibit maps its state orientation and outer-product write to the recurrent-state update published in the 2025 BDH paper and links the official Pathway implementation. It reproduces a mechanism-level identity, not a trained BDH language result. The delta-style write remains a bounded architectural candidate that requires matched training and held-out language/recall evaluation before any model-level improvement claim.
-
-## Sixty-second judging route
-
-1. Open the default **Collision** preset and read `PARITY PASS` beside the failed amber recall.
-2. Click **Separated** to recover recall without changing the state shape or evaluator.
-3. Return to **Collision**, move the causal-step selector, and inspect `r_t`, `v_t`, and `S_(t-1)`.
-4. Read the **35% overlap** boundary, then compare additive and normalized-delta correction.
-5. Use the identical-key negative control to state what the intervention cannot fix.
-6. Commit to a chunking prediction and reveal the computed parity result.
-7. Optionally use **Essay lab** to receive a bounded, clearly non-evidentiary co-review of the selected trace.
-
-## AI, data, asset, and license disclosure
-
-OpenAI Codex assisted with PS analysis, literature research, concept selection, mathematics, code, tests, interface work, documentation, and QA. The optional runtime endpoint asks Groq-hosted GPT-OSS 120B for a bounded co-review and otherwise serves a repository-authored deterministic response; the interface names the actual responder, and neither response is experiment evidence. Runtime vectors are deterministic and synthetic. No external datasets, model weights, generated media, copied template, external font, or proprietary code are shipped. Repository-authored code and prose are MIT-licensed; cited papers are linked rather than redistributed.
+Delete the obsolete model credential from Vercel project settings yourself. Confirm freeze/edit permission with organizers before promotion, merging, or changing the form. Do not replace v1 PDF unless that switch explicitly changes.
