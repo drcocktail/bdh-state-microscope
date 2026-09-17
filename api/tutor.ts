@@ -72,13 +72,14 @@ export function deterministicReview(explanation: string, trace: Trace) {
 type ModelReview = ReturnType<typeof deterministicReview>
 
 /** Trust nothing in the model's JSON: ids, quotes and probe ranges are all re-checked here. */
-export function sanitizeModelReview(raw: unknown, explanation: string, fallback: ModelReview): ModelReview | null {
+export function sanitizeModelReview(raw: unknown, explanation: string, fallback: ModelReview, trace?: Trace): ModelReview | null {
   const value = raw as { concepts?: unknown; followUp?: unknown; probe?: unknown } | null
   if (!value || typeof value !== 'object' || !Array.isArray(value.concepts)) return null
   const haystack = explanation.toLowerCase()
   const concepts = CONCEPTS.map((concept, index) => {
     const entry = (value.concepts as Array<Record<string, unknown>>).find(c => String(c?.id) === concept.id) ?? {}
-    const quote = typeof entry.quote === 'string' ? entry.quote.trim().slice(0, 160) : ''
+    // Models like to quote the whole answer back: keep a short phrase that is still the reader's own.
+    const quote = typeof entry.quote === 'string' ? entry.quote.trim().split(/\s+/).slice(0, 14).join(' ').slice(0, 120) : ''
     const note = typeof entry.note === 'string' && entry.note.trim() ? entry.note.trim().slice(0, 240) : concept.guidance
     return {
       id: concept.id,
@@ -93,7 +94,9 @@ export function sanitizeModelReview(raw: unknown, explanation: string, fallback:
   const overlap = Math.round(Number(probeRaw?.overlap) / 5) * 5
   const load = Math.round(Number(probeRaw?.load))
   const claim = typeof probeRaw?.claim === 'string' ? probeRaw.claim.trim().slice(0, 140) : ''
-  const probe = Number.isFinite(overlap) && overlap >= 0 && overlap <= 95 && Number.isInteger(load) && load >= 1 && load <= 7 && claim
+  // A probe identical to the trace on screen tests nothing, so fall back to one that moves.
+  const sameAsTrace = trace ? overlap === trace.overlap && load === trace.load : false
+  const probe = Number.isFinite(overlap) && overlap >= 0 && overlap <= 95 && Number.isInteger(load) && load >= 1 && load <= 7 && claim && !sameAsTrace
     ? { overlap, load, claim }
     : fallback.probe
   return { concepts, captured: concepts.filter(c => c.met).length, followUp, probe }
@@ -140,12 +143,14 @@ async function teachback(explanation: string, trace: Trace) {
           'Use only the supplied observation for numbers. Never invent measurements or cite papers.',
           'Reply with JSON: {"concepts":[{"id":"same-answer","met":bool,"quote":"","note":""},{"id":"what-memory-stores",...},{"id":"why-recall-fails",...}],"followUp":"","probe":{"overlap":int,"load":int,"claim":""}}.',
           'Each quote must be copied verbatim from the reader when met is true, else empty. Each note is one sentence of feedback addressed to the reader.',
-          'followUp is one question that targets their weakest part. probe.overlap is a multiple of 5 from 0 to 95 and probe.load an integer 1 to 7: a configuration whose outcome their explanation implies, with claim stating what they would predict.',
+          'Each quote is at most 12 words: the shortest phrase from the reader that shows the concept, not their whole answer.',
+          'followUp is one question that targets their weakest part.',
+          'probe is a NEW experiment, different from the trace shown: probe.overlap is a multiple of 5 from 0 to 95 and probe.load an integer 1 to 7, and it must differ from the trace. claim states, in one sentence addressed to the reader, what their explanation predicts will happen there.',
         ].join(' ') },
         { role: 'user', content: `Concepts:\n${CONCEPTS.map(c => `${c.id}: ${c.guidance}`).join('\n')}\n\nLive trace:\n${observation}\n\nReader's explanation:\n"""${explanation}"""` },
       ],
     })
-    const review = sanitizeModelReview(JSON.parse(content), explanation, offline)
+    const review = sanitizeModelReview(JSON.parse(content), explanation, offline, trace)
     if (!review) throw new Error('Groq returned an unusable review')
     return { ...review, mode: 'model' as const, model, observation }
   } catch (error) {

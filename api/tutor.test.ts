@@ -75,6 +75,26 @@ describe('model output sanitising', () => {
     expect(review?.probe).toEqual(fallback.probe)
   })
 
+  it('shortens a quote that copies the whole answer', () => {
+    const review = sanitizeModelReview({
+      concepts: [{ id: 'same-answer', met: true, quote: explanation, note: 'Good.' }],
+      followUp: 'Why?',
+      probe: { overlap: 80, load: 4, claim: 'Amber still wins.' },
+    }, explanation, fallback)
+    expect(review?.concepts[0].quote.split(' ').length).toBeLessThanOrEqual(14)
+    expect(explanation.toLowerCase()).toContain(review!.concepts[0].quote.toLowerCase())
+  })
+
+  it('rejects a probe identical to the trace already on screen', () => {
+    const review = sanitizeModelReview({
+      concepts: [],
+      followUp: 'Why?',
+      probe: { overlap: trace.overlap, load: trace.load, claim: 'Nothing changes.' },
+    }, explanation, fallback, trace)
+    expect(review?.probe).toEqual(fallback.probe)
+    expect(review?.probe.overlap).not.toBe(trace.overlap)
+  })
+
   it('refuses a malformed payload so the caller falls back', () => {
     expect(sanitizeModelReview({ nonsense: true }, explanation, fallback)).toBeNull()
     expect(sanitizeModelReview(null, explanation, fallback)).toBeNull()
